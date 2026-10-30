@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace = "com.pageflow.reader"
+    namespace = "com.pagehop.reader"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.pageflow.reader"
+        applicationId = "com.pagehop.reader"
         minSdk = 26
         targetSdk = 34
-        versionCode = 71
-        versionName = "0.8.8"
+        versionCode = 72
+        versionName = "0.9.0"
 
         ndk {
             // arm64-v8a：真机（iQOO Z10 Turbo）

@@ -54,7 +54,7 @@ Write-Host "== install: $leaf -> $Serial ==" -ForegroundColor Cyan
 $null = & $adb @sArg shell input keyevent KEYCODE_WAKEUP 2>$null
 $null = & $adb @sArg shell wm dismiss-keyguard 2>$null
 
-$remote = '/data/local/tmp/pageflow-install.apk'
+$remote = '/data/local/tmp/pagehop-install.apk'
 $job = Start-Job -ScriptBlock {
     param($adbPath, $apkPath, $serialArgs, $remotePath)
     $out = @()

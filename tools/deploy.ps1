@@ -76,7 +76,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "== 启动 ==" -ForegroundColor Cyan
-& $adb @sArg shell am start -n com.pageflow.reader/.MainActivity 2>$null | Out-Null
+& $adb @sArg shell am start -n com.pagehop.reader/.MainActivity 2>$null | Out-Null
 
 if ($Log) {
     Write-Host "== 日志 (Ctrl+C 退出) ==" -ForegroundColor Cyan

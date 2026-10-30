@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">PageFlow</string>
+    <string name="app_name">PageHop</string>
     <string name="subtitle">专为扫描版 PDF 调整过的阅读器</string>
     <string name="open_pdf">打开 PDF</string>
     <string name="open_pdf_all">所有文件</string>
@@ -54,7 +54,7 @@
     <string name="more">更多</string>
     <string name="jump_to_page">跳转到页码…</string>
     <string name="back_to_library">回到书库</string>
-    <string name="about">关于 PageFlow</string>
+    <string name="about">关于 PageHop</string>
     <string name="auto_crop">自动裁边</string>
     <string name="auto_rotate">自动旋转</string>
     <string name="page_slash">/ %1$d</string>

@@ -1,10 +1,10 @@
-# PageFlow
+# PageHop
 
 **把扫描版 PDF 读成一本"能翻的书"。**
 
-手机上看扫描件最烦的三件事：白边吃掉半屏、字灰得像没对上焦、翻到一半忘了自己在哪。PageFlow 就为这三件事而做——只做 PDF，只做阅读。
+手机上看扫描件最烦的三件事：白边吃掉半屏、字灰得像没对上焦、翻到一半忘了自己在哪。PageHop 就为这三件事而做——只做 PDF，只做阅读。
 
-[📥 下载最新版 APK](PageFlow-latest.apk) ｜ [设计文档](DESIGN.md) ｜ [反馈问题](https://github.com/Speacnow/pageflow/issues)
+[📥 下载最新版 APK](PageHop-latest.apk) ｜ [设计文档](DESIGN.md) ｜ [反馈问题](https://github.com/Speacnow/page-hop/issues)
 
 ---
 
@@ -90,7 +90,7 @@
 
 ## 安装
 
-1. 下载 [PageFlow-latest.apk](PageFlow-latest.apk)
+1. 下载 [PageHop-latest.apk](PageHop-latest.apk)
 2. 手机上点开安装；第一次会提示"允许安装未知来源应用"，放行即可
 3. iQOO / vivo 如果弹出「安全守护」，选继续安装
 

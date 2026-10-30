@@ -18,5 +18,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "PageFlow"
+rootProject.name = "PageHop"
 include(":app")

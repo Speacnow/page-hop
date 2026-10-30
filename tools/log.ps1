@@ -19,7 +19,7 @@ if ($All) {
     exit 0
 }
 
-$appPid = (& $adb shell pidof -s com.pageflow.reader) -join ""
+$appPid = (& $adb shell pidof -s com.pagehop.reader) -join ""
 if ([string]::IsNullOrWhiteSpace($appPid)) {
     Write-Host "App 没在运行，先跑 tools\deploy.ps1 启动它。" -ForegroundColor Yellow
     if ($Follow) {

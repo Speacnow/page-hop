@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:background="@color/reader_bg">
 
-    <com.pageflow.reader.ui.ZoomGrid
+    <com.pagehop.reader.ui.ZoomGrid
         android:id="@+id/thumbGrid"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

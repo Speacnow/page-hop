@@ -18,7 +18,7 @@ docs/*.png
 
 # ---- 安装包：只保留最新一个，历史版本不进仓库 ----
 *.apk
-!PageFlow-latest.apk
+!PageHop-latest.apk
 
 # ---- 一次性分析脚本（路径写死在本机，对别人没用）----
 tools/*.py

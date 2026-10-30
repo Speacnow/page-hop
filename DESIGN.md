@@ -1,4 +1,4 @@
-# PageFlow 设计文档
+# PageHop 设计文档
 
 这份文档写的是**为什么这么做**，不是怎么用。使用说明见 [README.md](README.md)。
 
@@ -231,7 +231,7 @@ apk-deploy    # 任意 Gradle 安卓项目：编译 → 装最新 debug APK → 
 
 ### 发布流程
 
-仓库里**只保留一个安装包**：`PageFlow-latest.apk`。历史版本不进 Git（`.gitignore` 里 `*.apk` + `!PageFlow-latest.apk`），
+仓库里**只保留一个安装包**：`PageHop-latest.apk`。历史版本不进 Git（`.gitignore` 里 `*.apk` + `!PageHop-latest.apk`），
 这样每次发版只是覆盖同一个文件，链接永远有效，仓库也不会越滚越大。
 
 ```
@@ -240,7 +240,7 @@ apk-deploy    # 任意 Gradle 安卓项目：编译 → 装最新 debug APK → 
 gradle assembleDebug
 apk-deploy
 # 3. 更新安装包 + 提交
-cp app/build/outputs/apk/debug/app-debug.apk PageFlow-latest.apk
+cp app/build/outputs/apk/debug/app-debug.apk PageHop-latest.apk
 git add -A && git commit -m "vX.Y.Z：一句话说明"
 git push
 ```
@@ -250,7 +250,7 @@ git push
 `adb shell input` 只能单指，`/dev/input/event4` 被 SELinux 挡着。所以 App 内置 `GestureProbe`，把合成的 `MotionEvent` 灌进 `ZoomFrame.dispatchTouchEvent`，走和真手指完全相同的分发链路：
 
 ```
-adb shell am start -n com.pageflow.reader/.ReaderActivity \
+adb shell am start -n com.pagehop.reader/.ReaderActivity \
   -d 'content://...' --es probe 'pen+pinch:400:1400+pinch:1400:300+drag2:-800+log'
 adb logcat -s PFProbe:*
 ```

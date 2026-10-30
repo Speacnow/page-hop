@@ -12,18 +12,18 @@
         android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.PageFlow">
+        android:theme="@style/Theme.PageHop">
 
         <activity
             android:name=".ReaderActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="false"
-            android:theme="@style/Theme.PageFlow.Reader" />
+            android:theme="@style/Theme.PageHop.Reader" />
 
         <activity
             android:name=".SettingsActivity"
             android:exported="false"
-            android:theme="@style/Theme.PageFlow.Settings" />
+            android:theme="@style/Theme.PageHop.Settings" />
 
         <activity
             android:name=".MainActivity"

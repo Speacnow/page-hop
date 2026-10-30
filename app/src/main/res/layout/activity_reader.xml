@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/reader_bg">
 
-    <com.pageflow.reader.ui.ZoomFrame
+    <com.pagehop.reader.ui.ZoomFrame
         android:id="@+id/zoomFrame"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -19,7 +19,7 @@
             android:paddingTop="48dp"
             android:paddingBottom="80dp" />
 
-    </com.pageflow.reader.ui.ZoomFrame>
+    </com.pagehop.reader.ui.ZoomFrame>
 
     <!-- 左边缘：从左边往右滑，拉出目录面板（只在未缩放时生效） -->
     <View
