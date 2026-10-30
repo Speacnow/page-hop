@@ -178,6 +178,14 @@ fun contentFor(bg: Int): Int {
 
 ## 四、踩过的坑
 
+### 缩略图地图里那个"3 列"角标不消失（v0.8.8）
+
+现象：打开缩略图地图，屏幕中间一直挂着一个"3 列"，切一次列数才消失。
+
+原因不在角标本身，在 `applySpan()` 的职责太杂：它既负责"换列数 + 保住锚点页"，又在结尾顺手 `showBadge()`。而**打开面板、转屏、键盘弹出导致的重排**都会走到 `applySpan()`——这些路径只调它、不调 `hideBadgeSoon()`，于是角标亮着没人收。
+
+修法是把提示从排版里摘出来：`applySpan()` 只排版，需要提示的调用方（双指缩放 `onSpanRequested`、点顶栏列数）自己 `showBadge()`。一个函数只做一件事，顺带就治好了"某个分支忘了收尾"这类问题。
+
 ### 批注模式下捏不动（v0.3.3）
 
 `PageView` 按下时 `requestDisallowInterceptTouchEvent(true)` 独占手势（写字时不能让列表把事件抢走），这个独占会持续到抬手，于是第二根手指落下时 `ACTION_POINTER_DOWN` 根本传不到 `ZoomFrame`，双指基准 `span0` 一直是 0，后续每帧 MOVE 都被挡掉。

@@ -2046,7 +2046,9 @@ class ReaderActivity : AppCompatActivity() {
             if (first >= 0 && last >= first) {
                 grid.post { thumbAdapter.notifyItemRangeChanged(first, last - first + 1) }
             }
-            showBadge(target)
+            // 这里**不弹**"N 列"角标：转屏、打开面板时的重排也会走到这里，
+            // 如果顺手弹一个就没人负责收——之前"打开缩略图地图，中间一直挂着一个 3 列"就是这个。
+            // 需要提示的调用方（双指缩放、点顶栏列数）自己调 showBadge()。
         }
 
         thumbMapRelayout = { applySpan(glm.spanCount, glm.findFirstVisibleItemPosition()) }
@@ -2070,13 +2072,17 @@ class ReaderActivity : AppCompatActivity() {
             anchorAtScale = -1
             hideBadgeSoon()
         }
-        grid.onSpanRequested = { target -> applySpan(target, anchorAtScale) }
+        grid.onSpanRequested = { target ->
+            applySpan(target, anchorAtScale)
+            showBadge(target)
+        }
 
         // 顶栏的“N 列”也能点：点一下换一档，给不方便做双指手势的场合留个入口
         tvDensity.setOnClickListener {
             val next = if (glm.spanCount >= ThumbZoom.MAX_SPANS) ThumbZoom.MIN_SPANS
             else glm.spanCount + 1
             applySpan(next, glm.findFirstVisibleItemPosition())
+            showBadge(next)
             hideBadgeSoon()
         }
 

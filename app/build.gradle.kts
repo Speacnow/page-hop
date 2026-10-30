@@ -11,8 +11,8 @@ android {
         applicationId = "com.pageflow.reader"
         minSdk = 26
         targetSdk = 34
-        versionCode = 70
-        versionName = "0.8.7"
+        versionCode = 71
+        versionName = "0.8.8"
 
         ndk {
             // arm64-v8a：真机（iQOO Z10 Turbo）
