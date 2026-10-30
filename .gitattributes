@@ -1,0 +1,13 @@
+# 统一换行符：源码走平台默认，脚本和二进制各自固定
+* text=auto
+
+*.png binary
+*.jpg binary
+*.apk binary
+*.jar binary
+
+gradlew    text eol=lf
+*.sh       text eol=lf
+*.bat      text eol=crlf
+*.cmd      text eol=crlf
+*.ps1      text eol=crlf

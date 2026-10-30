@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="brand">#44685F</color>
+    <color name="brand_on">#FFFFFF</color>
+    <color name="ic_launcher_background">#16202A</color>
+    <color name="reader_scrim">#F2181818</color>
+    <color name="reader_bg">#121212</color>
+    <!-- 顶/底栏：取自 ReadEra 截图的深青 -->
+    <color name="reader_bar">#FF005E78</color>
+    <color name="reader_bar_dim">#FF004B60</color>
+    <color name="hl_yellow">#FFFFC400</color>
+    <color name="hl_green">#FF4CAF50</color>
+    <color name="hl_blue">#FF2196F3</color>
+    <color name="hl_pink">#FFE91E63</color>
+</resources>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#FF141414">
+
+    <ImageView
+        android:id="@+id/imgThumb"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/thumbs"
+        android:scaleType="fitCenter" />
+
+    <!-- 当前阅读页：淡红色底 + 红色描边，一眼定位"我在哪" -->
+    <View
+        android:id="@+id/vCurrentTint"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#26FF5252"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/tvNum"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:background="#99000000"
+        android:paddingStart="4dp"
+        android:paddingTop="1dp"
+        android:paddingEnd="4dp"
+        android:paddingBottom="1dp"
+        android:textColor="#FFFFFFFF"
+        android:textSize="10sp" />
+
+    <View
+        android:id="@+id/vCurrent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_current_page"
+        android:visibility="gone" />
+
+</FrameLayout>

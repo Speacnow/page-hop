@@ -1,0 +1,28 @@
+# ---- 构建产物 ----
+build/
+app/build/
+.gradle/
+local.properties
+.idea/
+*.iml
+.kotlin/
+captures/
+
+# ---- 本地测试素材（100MB 级的扫描件样张，不进仓库）----
+test.pdf
+sample.pdf
+
+# ---- 开发过程的截图（仓库里只保留 docs/screens 下精选的几张）----
+shots/
+docs/*.png
+
+# ---- 安装包：只保留最新一个，历史版本不进仓库 ----
+*.apk
+!PageFlow-latest.apk
+
+# ---- 一次性分析脚本（路径写死在本机，对别人没用）----
+tools/*.py
+
+# ---- 系统文件 ----
+Thumbs.db
+.DS_Store

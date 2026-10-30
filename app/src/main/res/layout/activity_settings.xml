@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 设置页：独立整页，不再是弹窗 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/settingsRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/reader_bg"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/reader_bar"
+        android:elevation="6dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="16dp">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/back"
+            android:scaleType="center"
+            android:src="@drawable/ic_back" />
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@string/settings"
+            android:textColor="#FFFFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingTop="18dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="40dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="阅读预览"
+                android:textColor="#FF7FE3F5"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvAlpha"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="预览透明度"
+                android:textColor="#FFFFFFFF"
+                android:textSize="15sp" />
+
+            <SeekBar
+                android:id="@+id/sbAlpha"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="长按缩略图弹出大图预览时的不透明度，0% = 完全不透明，100% = 完全透明"
+                android:textColor="#99FFFFFF"
+                android:textSize="11sp" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/swGrid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:text="长按时显示棋盘格线"
+                android:textColor="#FFFFFFFF"
+                android:textSize="15sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="26dp"
+                android:text="棋盘格线颜色"
+                android:textColor="#FF7FE3F5"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="长按缩略图时，每个格子四周描这个颜色的线"
+                android:textColor="#99FFFFFF"
+                android:textSize="11sp" />
+
+            <LinearLayout
+                android:id="@+id/gridColorRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="26dp"
+                android:text="界面配色"
+                android:textColor="#FF7FE3F5"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="顶栏和底栏的颜色（正文颜色在阅读页的「颜色」里单独调）"
+                android:textColor="#99FFFFFF"
+                android:textSize="11sp" />
+
+            <LinearLayout
+                android:id="@+id/barColorRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/tvAbout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="36dp"
+                android:gravity="center"
+                android:textColor="#66FFFFFF"
+                android:textSize="11sp" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/reader_bg">
+
+    <com.pageflow.reader.ui.ZoomFrame
+        android:id="@+id/zoomFrame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/pageList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:overScrollMode="never"
+            android:paddingTop="48dp"
+            android:paddingBottom="80dp" />
+
+    </com.pageflow.reader.ui.ZoomFrame>
+
+    <!-- 左边缘：从左边往右滑，拉出目录面板（只在未缩放时生效） -->
+    <View
+        android:id="@+id/tocEdge"
+        android:layout_width="22dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start" />
+
+    <!-- 右上角：点一下给当前页加/删书签（不挡正文阅读，只在角落） -->
+    <View
+        android:id="@+id/bookmarkHotspot"
+        android:layout_width="78dp"
+        android:layout_height="78dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="48dp"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <ImageView
+        android:id="@+id/bookmarkFx"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="70dp"
+        android:layout_marginEnd="22dp"
+        android:alpha="0"
+        android:contentDescription="@string/bookmark"
+        android:src="@drawable/ic_bookmark" />
+
+    <!-- 顶栏：一行图标，放不下时可以左右滑动（手写/文字批注分开两个按钮） -->
+    <HorizontalScrollView
+        android:id="@+id/topBarScroll"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_gravity="top"
+        android:background="@color/reader_bar"
+        android:clickable="true"
+        android:elevation="6dp"
+        android:fillViewport="true"
+        android:focusable="true"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/topBar"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="52dp"
+                android:layout_height="44dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/back"
+                android:scaleType="center"
+                android:src="@drawable/ic_back" />
+
+            <ImageButton
+                android:id="@+id/btnToc"
+                android:layout_width="52dp"
+                android:layout_height="44dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/toc"
+                android:scaleType="center"
+                android:src="@drawable/ic_toc" />
+
+            <ImageButton
+                android:id="@+id/btnColor"
+                android:layout_width="52dp"
+                android:layout_height="44dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/color"
+                android:scaleType="center"
+                android:src="@drawable/ic_palette" />
+
+            <ImageButton
+                android:id="@+id/btnCrop"
+                android:layout_width="52dp"
+                android:layout_height="44dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/crop"
+                android:scaleType="center"
+                android:src="@drawable/ic_crop" />
+
+            <FrameLayout
+                android:id="@+id/btnHighlight"
+                android:layout_width="52dp"
+                android:layout_height="44dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:id="@+id/ivHighlight"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/highlight"
+                    android:src="@drawable/ic_highlight" />
+            </FrameLayout>
+
+            <ImageButton
+                android:id="@+id/btnText"
+                android:layout_width="52dp"
+                android:layout_height="44dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="文字批注"
+                android:scaleType="center"
+                android:src="@drawable/ic_text" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <ImageButton
+                android:id="@+id/btnSettings"
+                android:layout_width="52dp"
+                android:layout_height="44dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/settings"
+                android:scaleType="center"
+                android:src="@drawable/ic_settings" />
+
+            <ImageButton
+                android:id="@+id/btnMore"
+                android:layout_width="52dp"
+                android:layout_height="44dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/more"
+                android:scaleType="center"
+                android:src="@drawable/ic_more" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- 底栏：竖屏两行（页码 / 工具）；横屏在代码里把页码那行塞进工具行，拼成一行 -->
+    <LinearLayout
+        android:id="@+id/bottomBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@color/reader_bar"
+        android:clickable="true"
+        android:elevation="6dp"
+        android:focusable="true"
+        android:orientation="vertical">
+
+        <!-- 后退 / 当前页 / 总页数 / 前进，点中间空白处输入页码跳转 -->
+        <LinearLayout
+            android:id="@+id/btnPageJump"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingTop="4dp">
+
+            <ImageButton
+                android:id="@+id/btnPageBack"
+                android:layout_width="34dp"
+                android:layout_height="32dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/page_back"
+                android:src="@drawable/ic_chevron_left" />
+
+            <TextView
+                android:id="@+id/tvPage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvTotal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:textColor="#FFFFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/btnPageForward"
+                android:layout_width="34dp"
+                android:layout_height="32dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/page_forward"
+                android:src="@drawable/ic_chevron_right" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/btnTools"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"
+            android:paddingBottom="2dp">
+
+            <ImageButton
+                android:id="@+id/btnThumbs"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/thumbs"
+                android:src="@drawable/ic_grid" />
+
+            <SeekBar
+                android:id="@+id/seekProgress"
+                android:layout_width="0dp"
+                android:layout_height="34dp"
+                android:layout_weight="1"
+                android:maxHeight="3dp"
+                android:minHeight="3dp"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:progressDrawable="@drawable/seek_progress"
+                android:splitTrack="false"
+                android:thumb="@drawable/seek_thumb" />
+
+            <FrameLayout
+                android:id="@+id/btnRotate"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:id="@+id/ivRotate"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/auto_rotate"
+                    android:src="@drawable/ic_rotate" />
+            </FrameLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 跳转后出现在顶部：告诉你跳到第几页，点一下能回到原位置 -->
+    <TextView
+        android:id="@+id/topBanner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="56dp"
+        android:background="@drawable/bg_chip"
+        android:clickable="true"
+        android:elevation="8dp"
+        android:focusable="true"
+        android:paddingStart="18dp"
+        android:paddingTop="9dp"
+        android:paddingEnd="18dp"
+        android:paddingBottom="9dp"
+        android:textColor="#FFFFFFFF"
+        android:textSize="13sp"
+        android:visibility="gone" />
+
+</FrameLayout>

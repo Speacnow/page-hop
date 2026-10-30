@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 目录 / 书签：从左侧滑出，占屏幕一半多一点 -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tocRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#66000000">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:layout_marginEnd="100dp"
+        android:background="@color/reader_bg"
+        android:clickable="true"
+        android:elevation="16dp"
+        android:focusable="true"
+        android:orientation="vertical">
+
+        <!-- 第一行：三个页签（书签 / 目录 / 缩略图）+ 关闭 -->
+        <LinearLayout
+            android:id="@+id/tocHeader"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:background="@color/reader_bar"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="14dp"
+            android:paddingEnd="4dp">
+
+            <TextView
+                android:id="@+id/tabBookmarks"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:text="@string/toc_bookmarks"
+                android:textColor="#FFFFFFFF"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tabToc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:text="@string/toc_all"
+                android:textColor="#99FFFFFF"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tabThumbs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:text="@string/thumbs"
+                android:textColor="#99FFFFFF"
+                android:textSize="13sp" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <ImageButton
+                android:id="@+id/btnTocClose"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/cancel"
+                android:src="@drawable/ic_close" />
+        </LinearLayout>
+
+        <!--
+            第二行：选项条。放在列表外面，所以永远顶在最上面，
+            列表怎么滚都不会把它带走。
+              左：页码 / 缩略图（同一个列表换一种画法）
+              右：正序 / 倒序
+        -->
+        <LinearLayout
+            android:id="@+id/tocOptions"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@color/reader_bar_dim"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="8dp"
+            android:paddingEnd="6dp">
+
+            <TextView
+                android:id="@+id/chipPage"
+                android:layout_width="wrap_content"
+                android:layout_height="26dp"
+                android:gravity="center"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="@string/toc_show_page"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/chipThumb"
+                android:layout_width="wrap_content"
+                android:layout_height="26dp"
+                android:layout_marginStart="4dp"
+                android:gravity="center"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="@string/toc_show_thumb"
+                android:textSize="12sp" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/chipAdd"
+                android:layout_width="wrap_content"
+                android:layout_height="26dp"
+                android:gravity="center"
+                android:paddingStart="9dp"
+                android:paddingEnd="9dp"
+                android:text="@string/toc_order_added"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/chipRecent"
+                android:layout_width="wrap_content"
+                android:layout_height="26dp"
+                android:layout_marginStart="4dp"
+                android:gravity="center"
+                android:paddingStart="9dp"
+                android:paddingEnd="9dp"
+                android:text="@string/toc_order_recent"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvTocEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="18dp"
+            android:text="@string/toc_empty"
+            android:textColor="#99FFFFFF"
+            android:textSize="13sp"
+            android:visibility="gone" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/thumbList"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:overScrollMode="never"
+            android:visibility="gone" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/tocList"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:overScrollMode="never"
+            android:paddingBottom="8dp" />
+    </LinearLayout>
+
+</FrameLayout>
