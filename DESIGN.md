@@ -209,6 +209,22 @@ apk-deploy    # 任意 Gradle 安卓项目：编译 → 装最新 debug APK → 
 
 一轮改动到看到效果约 20 秒（增量编译）+ 5~10 秒（安装启动）。
 
+### 发布流程
+
+仓库里**只保留一个安装包**：`PageFlow-latest.apk`。历史版本不进 Git（`.gitignore` 里 `*.apk` + `!PageFlow-latest.apk`），
+这样每次发版只是覆盖同一个文件，链接永远有效，仓库也不会越滚越大。
+
+```
+# 1. 改版本号 app/build.gradle.kts（versionCode / versionName）
+# 2. 编译安装到真机验证
+gradle assembleDebug
+apk-deploy
+# 3. 更新安装包 + 提交
+cp app/build/outputs/apk/debug/app-debug.apk PageFlow-latest.apk
+git add -A && git commit -m "vX.Y.Z：一句话说明"
+git push
+```
+
 ### 手势探针
 
 `adb shell input` 只能单指，`/dev/input/event4` 被 SELinux 挡着。所以 App 内置 `GestureProbe`，把合成的 `MotionEvent` 灌进 `ZoomFrame.dispatchTouchEvent`，走和真手指完全相同的分发链路：
