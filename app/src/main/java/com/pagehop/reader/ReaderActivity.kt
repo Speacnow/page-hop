@@ -725,9 +725,14 @@ class ReaderActivity : AppCompatActivity() {
         main.removeCallbacks(persistRunnable)
         cancelPendingJump()
         if (::adapter.isInitialized) adapter.release()
-        val d = doc
-        CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
-            withContext(RenderEngine.dispatcher) { runCatching { d.close() } }
+        // onCreate 提前 finish 的路径（没有 uri、打不开文件）也会走到这里，
+        // 那时 doc 还没赋值，直接读会抛 UninitializedPropertyAccessException，
+        // 把"打不开文件"变成"一开就崩"
+        if (::doc.isInitialized) {
+            val d = doc
+            CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
+                withContext(RenderEngine.dispatcher) { runCatching { d.close() } }
+            }
         }
         scope.cancel()
         super.onDestroy()

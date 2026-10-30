@@ -22,7 +22,10 @@ class App : Application() {
                 val sw = StringWriter()
                 throwable.printStackTrace(PrintWriter(sw))
                 val ts = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date())
-                val text = "time: $ts\nversion: 0.1.0\n\n" + sw.toString()
+                val ver = runCatching {
+                    packageManager.getPackageInfo(packageName, 0).versionName
+                }.getOrNull() ?: "?"
+                val text = "time: $ts\nversion: $ver\n\n" + sw.toString()
                 File(filesDir, CRASH_FILE).writeText(text)
             }
             previous?.uncaughtException(thread, throwable)

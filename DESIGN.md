@@ -186,6 +186,20 @@ fun contentFor(bg: Int): Int {
 
 修法是把提示从排版里摘出来：`applySpan()` 只排版，需要提示的调用方（双指缩放 `onSpanRequested`、点顶栏列数）自己 `showBadge()`。一个函数只做一件事，顺带就治好了"某个分支忘了收尾"这类问题。
 
+### 改名 PageFlow → PageHop 之后打不开书（v0.9.1）
+
+两层问题，先撞到的是表面那层。
+
+**表面：** 点书就崩。`onDestroy()` 里直接读 `lateinit var doc`，而"打不开文件"这条路径在 `onCreate` 里就 `finish()` 了，`doc` 根本没赋值 → `UninitializedPropertyAccessException`。任何"打开失败"都会长成"一开就崩"，掩盖真正的错误。
+
+**真正的原因：** Android 的持久化 URI 授权是**按包名**存的。换成 `com.pagehop.reader` 之后，旧的 `content://` 授权不继承，`openFileDescriptor` 直接 `SecurityException`。
+
+修法：
+1. `onDestroy` 加 `::doc.isInitialized` 守卫（顺带把崩溃日志里写死的 `version: 0.1.0` 改成读包信息）
+2. 书库点最近的书之前先 `canRead()`，读不了就弹「需要重新授权」——重新选一次同一个文件即可，因为书的进度/书签/批注是按 URI 存的，URI 没变，状态全部还在
+
+教训：**改包名 = 换一个应用**，除了 `filesDir` 要搬，URI 授权也得重新谈一次。
+
 ### 批注模式下捏不动（v0.3.3）
 
 `PageView` 按下时 `requestDisallowInterceptTouchEvent(true)` 独占手势（写字时不能让列表把事件抢走），这个独占会持续到抬手，于是第二根手指落下时 `ACTION_POINTER_DOWN` 根本传不到 `ZoomFrame`，双指基准 `span0` 一直是 0，后续每帧 MOVE 都被挡掉。

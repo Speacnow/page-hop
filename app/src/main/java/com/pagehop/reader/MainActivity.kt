@@ -64,11 +64,32 @@ class MainActivity : AppCompatActivity() {
     private fun openLastBook() {
         val last = Store.recent(this).firstOrNull() ?: return
         val uri = Uri.parse(last.uri)
-        val readable = runCatching {
-            contentResolver.openFileDescriptor(uri, "r")?.use { true } ?: false
-        }.getOrDefault(false)
-        if (!readable) return
+        if (!canRead(uri)) return
         openReader(uri, last.name)
+    }
+
+    /**
+     * 这个 URI 现在还能不能读。
+     * 换包名（PageFlow → PageHop）之后，系统保存的 URI 授权是按包名记的，
+     * 老授权不会继承过来，所以这里会返回 false —— 需要用户重新选一次文件。
+     */
+    private fun canRead(uri: Uri): Boolean = runCatching {
+        contentResolver.openFileDescriptor(uri, "r")?.use { true } ?: false
+    }.getOrDefault(false)
+
+    /** 授权失效时给一条明确出路，而不是点一下直接"打不开这个文件" */
+    private fun askReauthorize(uri: Uri, name: String) {
+        AlertDialog.Builder(this)
+            .setTitle("需要重新授权")
+            .setMessage(
+                "「$name」的访问权限已经失效（应用换过包名，系统的文件授权不会跟着走）。\n\n" +
+                    "点「重新选择」再选一次这个 PDF 就行——阅读进度、书签、批注都还在。",
+            )
+            .setPositiveButton("重新选择") { _, _ ->
+                pickPdf.launch(arrayOf("application/pdf"))
+            }
+            .setNegativeButton("取消", null)
+            .show()
     }
 
     /** 上次崩溃了就把堆栈弹出来，方便一键复制反馈 */
@@ -172,7 +193,10 @@ class MainActivity : AppCompatActivity() {
             holder.name.text = e.name
             val pct = if (e.total > 0) ((e.page + 1) * 100 / e.total) else 0
             holder.progress.text = "第 ${e.page + 1} 页 / 共 ${e.total} 页 · $pct%"
-            holder.root.setOnClickListener { openReader(Uri.parse(e.uri), e.name) }
+            holder.root.setOnClickListener {
+                val uri = Uri.parse(e.uri)
+                if (canRead(uri)) openReader(uri, e.name) else askReauthorize(uri, e.name)
+            }
             holder.root.setOnLongClickListener {
                 AlertDialog.Builder(this@MainActivity)
                     .setMessage("从列表中移除「${e.name}」？\n（不会删除文件本身）")
