@@ -15,6 +15,11 @@ object UiPrefs {
     private const val K_BAR = "bar_color"
     private const val K_BAR_FG = "bar_content"
     private const val K_SPANS = "thumb_spans"
+    private const val K_VOLUME = "volume_keys"
+
+    /** 音量键翻页：默认关闭，开了之后音量上=上一页、音量下=下一页 */
+    var volumeKeys: Boolean = false
+        private set
 
     /** 长按预览大图的透明度：越小越透（0 = 全透明，1 = 不透明） */
     var previewAlpha: Float = 0.32f
@@ -69,6 +74,7 @@ object UiPrefs {
         val p = ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
         previewAlpha = p.getFloat(K_ALPHA, 0.32f).coerceIn(0f, 1f)
         thumbSpans = p.getInt(K_SPANS, 4)
+        volumeKeys = p.getBoolean(K_VOLUME, false)
         gridLines = p.getBoolean(K_GRID, true)
         gridColor = p.getInt(K_GRID_COLOR, 0xFFE53935.toInt())
         barColor = p.getInt(K_BAR, 0xFF005E78.toInt())
@@ -96,6 +102,11 @@ object UiPrefs {
     fun setThumbSpans(ctx: Context, spans: Int) {
         thumbSpans = spans
         edit(ctx).putInt(K_SPANS, spans).apply()
+    }
+
+    fun setVolumeKeys(ctx: Context, on: Boolean) {
+        volumeKeys = on
+        edit(ctx).putBoolean(K_VOLUME, on).apply()
     }
 
     fun setBarTheme(ctx: Context, bg: Int) {

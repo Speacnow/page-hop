@@ -43,6 +43,7 @@ class SettingsActivity : AppCompatActivity() {
 
         setupAlpha()
         setupGridSwitch()
+        setupVolumeSwitch()
         b.gridColorRow.addView(
             dotRow(UiPrefs.lineColors.map { it.second }, UiPrefs.gridColor) { picked ->
                 UiPrefs.setGridColor(this, picked)
@@ -102,6 +103,7 @@ class SettingsActivity : AppCompatActivity() {
         b.btnBack.setColorFilter(fg)
         b.tvAlpha.setTextColor(0xFFFFFFFF.toInt())
         b.swGrid.setTextColor(0xFFFFFFFF.toInt())
+        b.swVolume.setTextColor(0xFFFFFFFF.toInt())
     }
 
     private fun setupAlpha() {
@@ -132,6 +134,19 @@ class SettingsActivity : AppCompatActivity() {
             intArrayOf(0x66005E78, 0x339E9E9E),
         )
         b.swGrid.setOnCheckedChangeListener { _, checked -> UiPrefs.setGridLines(this, checked) }
+    }
+
+    private fun setupVolumeSwitch() {
+        b.swVolume.isChecked = UiPrefs.volumeKeys
+        b.swVolume.thumbTintList = ColorStateList(
+            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
+            intArrayOf(0xFF7FE3F5.toInt(), 0xFF9E9E9E.toInt()),
+        )
+        b.swVolume.trackTintList = ColorStateList(
+            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
+            intArrayOf(0x66005E78, 0x339E9E9E),
+        )
+        b.swVolume.setOnCheckedChangeListener { _, checked -> UiPrefs.setVolumeKeys(this, checked) }
     }
 
     /**

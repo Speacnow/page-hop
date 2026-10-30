@@ -96,6 +96,24 @@
                 android:textColor="#FFFFFFFF"
                 android:textSize="15sp" />
 
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/swVolume"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:text="音量键翻页"
+                android:textColor="#FFFFFFFF"
+                android:textSize="15sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="音量上 = 上一页、音量下 = 下一页；开着时音量键不再调音量"
+                android:textColor="#99FFFFFF"
+                android:textSize="11sp" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

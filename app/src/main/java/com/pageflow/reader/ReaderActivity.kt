@@ -26,6 +26,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -2324,6 +2325,28 @@ class ReaderActivity : AppCompatActivity() {
         (b.pageList.layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(p, 0)
         setPage(p)
         schedulePersist()
+    }
+
+    /**
+     * 音量键翻页（设置里默认关闭）。
+     * 面板 / 弹窗开着时不接管，免得在目录里翻页把面板后面的正文滚走。
+     */
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (UiPrefs.volumeKeys && ::doc.isInitialized &&
+            tocView == null && thumbMap == null && historyDialog == null
+        ) {
+            when (keyCode) {
+                KeyEvent.KEYCODE_VOLUME_UP -> {
+                    goToPage(currentPage - 1)
+                    return true
+                }
+                KeyEvent.KEYCODE_VOLUME_DOWN -> {
+                    goToPage(currentPage + 1)
+                    return true
+                }
+            }
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
     // ---------------- 前进 / 后退 ----------------
