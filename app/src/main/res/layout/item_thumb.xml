@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="@string/thumbs"
-        android:scaleType="fitCenter" />
+        android:scaleType="centerCrop" />
 
     <!-- 当前阅读页：淡红色底 + 红色描边，一眼定位"我在哪" -->
     <View
