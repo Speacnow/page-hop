@@ -2632,9 +2632,12 @@ class ReaderActivity : AppCompatActivity() {
         }
 
         val container = FrameLayout(this)
+        // 高度写死成"行数 × 格高"：交给 wrap_content 时，RecyclerView 在奇数条
+        // （例如 5 条 = 2 列 3 行）会少算一行，第 5 张图就露在面板圆角外面。
+        val gridHeight = rowsWanted * cellH + (4 * density).toInt()
         container.addView(
             grid,
-            FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER),
+            FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, gridHeight, Gravity.CENTER),
         )
         container.addView(
             overlay,
@@ -2646,7 +2649,8 @@ class ReaderActivity : AppCompatActivity() {
         dlg.setContentView(container)
         dlg.window?.let { w ->
             w.setBackgroundDrawableResource(android.R.color.transparent)
-            w.setDimAmount(0f)
+            // 背景压暗一点：面板浮在页面上，不压暗就看不出"这是弹出来的东西"
+            w.setDimAmount(0.55f)
             // 对话框窗口默认会被状态栏的 inset 挤小：窗口顶边不在屏幕顶边，
             // 于是"在窗口里居中"看起来就是偏下。窗口本身没法越过系统栏，所以
             // 这里先让它铺满可用区域，show() 之后再按真正的位置补偿（见下方 post）。
@@ -2665,6 +2669,14 @@ class ReaderActivity : AppCompatActivity() {
         dlg.show()
         // show() 之后主题可能又把尺寸改回 wrap_content，再钉一次
         dlg.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        // 阅读页是全屏的，这个对话框窗口却会让系统栏重新冒出来（顶上一整条状态栏
+        // 压在缩略图上）。把系统栏也一起藏掉，弹层的观感才和阅读页一致。
+        dlg.window?.let { w ->
+            val controller = WindowCompat.getInsetsController(w, container)
+            controller.hide(WindowInsetsCompat.Type.systemBars())
+            controller.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
 
         // 窗口被状态栏顶下去了一截（窗口顶边 = 状态栏高度）。把面板上移一半、
         // 给放大预览的底部补上同样一截，两者在"整块屏幕"上才是居中的。
