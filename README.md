@@ -6,7 +6,7 @@
 
 名字里的 *hop* 就是核心动作：翻开缩略图地图看一眼，一点就落到想去的那一页，再一点跳回来——像在页与页之间轻跳，而不是一页页硬翻。
 
-[📥 下载最新版 APK](PageHop-latest.apk) ｜ [设计文档](DESIGN.md) ｜ [反馈问题](https://github.com/Speacnow/page-hop/issues)
+[📥 下载最新版 APK](https://github.com/Speacnow/page-hop/releases/latest) ｜ [设计文档](DESIGN.md) ｜ [反馈问题](https://github.com/Speacnow/page-hop/issues)
 
 ---
 
@@ -99,13 +99,18 @@
 
 ## 安装
 
-1. 下载 [PageHop-latest.apk](PageHop-latest.apk)
-2. 手机上点开安装；第一次会提示"允许安装未知来源应用"，放行即可
+1. 打开 [最新版本页](https://github.com/Speacnow/page-hop/releases/latest)，在页面下方的 **Assets** 里点 `PageHop-vX.Y.Z.apk` 下载
+   （手机上直接用浏览器打开同一个地址即可，下完点通知栏里的文件就能装）
+2. 第一次安装会提示"允许安装未知来源应用"，按提示放行
 3. iQOO / vivo 如果弹出「安全守护」，选继续安装
 
 覆盖安装不用卸载：签名相同，**阅读进度和批注都会保留**。
 
 要求 Android 8.0（API 26）以上，已在 Android 15 / OriginOS 5 上实测。
+
+> 为什么 APK 放在 Releases 而不是仓库根目录：GitHub 对仓库里大于 10 MB 的文件不给预览，
+> 直接点会进到 "can't show files that big" 的页面，新手找不到下载按钮。
+> Releases 页是一个绿色的大按钮，点一下就开始下载。
 
 ---
 

@@ -245,19 +245,27 @@ apk-deploy    # 任意 Gradle 安卓项目：编译 → 装最新 debug APK → 
 
 ### 发布流程
 
-仓库里**只保留一个安装包**：`PageHop-latest.apk`。历史版本不进 Git（`.gitignore` 里 `*.apk` + `!PageHop-latest.apk`），
-这样每次发版只是覆盖同一个文件，链接永远有效，仓库也不会越滚越大。
+安装包分两处：
+
+- **仓库根目录**只留一个 `PageHop-latest.apk` 做备份（`.gitignore` 里 `*.apk` + `!PageHop-latest.apk`），历史版本不进 Git
+- **真正给用户下载的是 GitHub Release**。原因：仓库里超过 10 MB 的文件不给预览，直接链过去是 "can't show files that this big right now"，新手找不到下载按钮；Release 页面则是一个绿色大按钮
 
 ```
 # 1. 改版本号 app/build.gradle.kts（versionCode / versionName）
 # 2. 编译安装到真机验证
 gradle assembleDebug
 apk-deploy
-# 3. 更新安装包 + 提交
+# 3. 更新仓库里的备份包 + 提交
 cp app/build/outputs/apk/debug/app-debug.apk PageHop-latest.apk
 git add -A && git commit -m "vX.Y.Z：一句话说明"
 git push
+# 4. 网页版 Releases → Draft a new release，tag = vX.Y.Z，
+#    资产文件名带版本：PageHop-vX.Y.Z.apk（tools\release-urls.ps1 会把这套操作打出来）
+#    README 的下载链接统一指向 /releases/latest
 ```
+
+`releases/latest/download/PageHop-vX.Y.Z.apk` 这种直链**绑死了版本号**，发新版就失效；
+所以 README 只链 `/releases/latest` 页面，具体文件名让用户自己在 Assets 里点。
 
 ### 手势探针
 
