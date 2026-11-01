@@ -35,7 +35,6 @@ class PageAdapter(
     /** 点到已有文字批注（编辑/删除） */
     private val onTextNoteClicked: ((TextNote) -> Unit)? = null,
     private val onDoubleTapPage: () -> Unit,
-    private val onHighlightAdded: (Highlight) -> Unit,
     private val onStrokeAdded: (InkStroke) -> Unit,
     private val onHighlightClicked: (Highlight) -> Unit,
     private val onStrokeClicked: (InkStroke) -> Unit,
@@ -120,18 +119,6 @@ class PageAdapter(
         pv.onDoubleTap = { onDoubleTapPage() }
         pv.onHighlightClicked = { onHighlightClicked(it) }
         pv.onStrokeClicked = { onStrokeClicked(it) }
-        pv.onHighlightDrawn = { rect ->
-            if (pv.pageIndex == position) {
-                onHighlightAdded(
-                    Highlight(
-                        id = UUID.randomUUID().toString(),
-                        page = position,
-                        l = rect.left, t = rect.top, r = rect.right, b = rect.bottom,
-                        color = annotationColor,
-                    )
-                )
-            }
-        }
         pv.onStrokeDrawn = { points, penWidth ->
             if (pv.pageIndex == position) {
                 onStrokeAdded(

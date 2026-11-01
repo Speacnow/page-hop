@@ -110,9 +110,40 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="音量上 = 往前一屏、音量下 = 往后一屏（按屏幕上能看到的正文高度翻，上下留一点重叠）；开着时音量键不再调音量"
+                android:text="音量上 = 往前一屏、音量下 = 往后一屏（按屏幕上能看到的正文高度翻）；开着时音量键不再调音量"
                 android:textColor="#99FFFFFF"
                 android:textSize="11sp" />
+
+            <!-- 翻屏重叠：只在开了音量键翻页时出现 -->
+            <LinearLayout
+                android:id="@+id/boxOverlap"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/tvOverlap"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="翻屏重叠：10%"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="15sp" />
+
+                <SeekBar
+                    android:id="@+id/sbOverlap"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="翻一屏时上一屏保留多少在顶上，接着读不丢上下文。10% 大约两三行字，0% 正好紧接着翻"
+                    android:textColor="#99FFFFFF"
+                    android:textSize="11sp" />
+            </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"

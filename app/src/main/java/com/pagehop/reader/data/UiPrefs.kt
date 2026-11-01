@@ -16,6 +16,7 @@ object UiPrefs {
     private const val K_BAR_FG = "bar_content"
     private const val K_SPANS = "thumb_spans"
     private const val K_VOLUME = "volume_keys"
+    private const val K_VOLUME_OVERLAP = "volume_overlap"
     private const val K_ROTATE_AUTO = "rotate_auto"
     private const val K_ROTATE_LAND = "rotate_lock_landscape"
 
@@ -35,6 +36,13 @@ object UiPrefs {
 
     /** 音量键翻页：默认关闭，开了之后音量上=上一页、音量下=下一页 */
     var volumeKeys: Boolean = false
+        private set
+
+    /**
+     * 音量键翻屏时上下两屏重叠多少（百分比）。
+     * 默认 10%：上一屏最后两三行留在下一屏顶上，接得上、又不会白读太多。
+     */
+    var volumeOverlap: Int = 10
         private set
 
     /** 长按预览大图的透明度：越小越透（0 = 全透明，1 = 不透明） */
@@ -91,6 +99,7 @@ object UiPrefs {
         previewAlpha = p.getFloat(K_ALPHA, 0.32f).coerceIn(0f, 1f)
         thumbSpans = p.getInt(K_SPANS, 4)
         volumeKeys = p.getBoolean(K_VOLUME, false)
+        volumeOverlap = p.getInt(K_VOLUME_OVERLAP, 10).coerceIn(0, 40)
         rotateAuto = p.getBoolean(K_ROTATE_AUTO, false)
         rotateLockLandscape = p.getBoolean(K_ROTATE_LAND, false)
         gridLines = p.getBoolean(K_GRID, true)
@@ -125,6 +134,12 @@ object UiPrefs {
     fun setVolumeKeys(ctx: Context, on: Boolean) {
         volumeKeys = on
         edit(ctx).putBoolean(K_VOLUME, on).apply()
+    }
+
+    /** 翻屏重叠百分比（0~40） */
+    fun setVolumeOverlap(ctx: Context, percent: Int) {
+        volumeOverlap = percent.coerceIn(0, 40)
+        edit(ctx).putInt(K_VOLUME_OVERLAP, volumeOverlap).apply()
     }
 
     /** 切换旋转模式：auto=true 跟随重力；auto=false 锁死在 lockLandscape 指定的方向 */

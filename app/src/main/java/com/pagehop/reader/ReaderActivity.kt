@@ -92,12 +92,6 @@ class ReaderActivity : AppCompatActivity() {
         /** 长按历史按钮时弹出的缩略图条数（最近访问列表上限） */
         const val HISTORY_MAX = 6
 
-        /**
-         * 音量键翻屏时上下两屏重叠多少（占一屏的比例）。
-         * 4% 就是"竖屏一屏 1.4 页 → 翻 1.344 页"，刚好让上一屏最后一行留在下一屏顶上。
-         */
-        const val VOLUME_SCROLL_OVERLAP = 0.04f
-
         // 目录面板的三个页签，顺序就是界面上从左到右的顺序
         const val MODE_BOOKMARKS = 0
         const val MODE_TOC = 1
@@ -318,7 +312,7 @@ class ReaderActivity : AppCompatActivity() {
         prefs.edit().putBoolean("hint_shown", true).apply()
         Toast.makeText(
             this,
-            "单击页面：显示 / 隐藏工具栏\n长按页面后拖动：框选高亮",
+            "单击页面：显示 / 隐藏工具栏\n双指捏合：缩放\n从屏幕左边缘往右滑：打开目录",
             Toast.LENGTH_LONG,
         ).show()
     }
@@ -346,11 +340,6 @@ class ReaderActivity : AppCompatActivity() {
                 }
             },
             onDoubleTapPage = { toggleBars() },
-            onHighlightAdded = { h ->
-                state.highlights.add(h)
-                refreshAnnotations(h.page)
-                persistNow()
-            },
             onStrokeAdded = { s ->
                 state.strokes.add(s)
                 refreshAnnotations(s.page)
@@ -2401,8 +2390,8 @@ class ReaderActivity : AppCompatActivity() {
      * 音量键翻"一屏"，不是翻"一页"。
      *
      * 屏幕上能放几页，一次就滚几页：竖屏一屏 1.4 页就滚 1.4 页，横屏只看得见半页
-     * 就滚半页。再留一点重叠（[VOLUME_SCROLL_OVERLAP]），上下屏之间有几行接得上，
-     * 不会正好把一句话切在边缘。
+     * 就滚半页。再留一点重叠（设置里的"翻屏重叠"，默认 10%），上下屏之间有几行
+     * 接得上，不会正好把一句话切在边缘。
      *
      * 放大过之后，能看到的列表高度只有 1/scale，按这个算才不会一次滚过头。
      */
@@ -2415,7 +2404,9 @@ class ReaderActivity : AppCompatActivity() {
         val h = view.height.takeIf { it > 0 } ?: resources.displayMetrics.heightPixels
         val content = (h - view.paddingTop - view.paddingBottom).coerceAtLeast(1)
         val visible = content / screen
-        val dy = (visible * (1f - VOLUME_SCROLL_OVERLAP)).toInt().coerceAtLeast(1)
+        // 重叠比例来自设置（默认 10%），改完立刻生效，不用重开书
+        val overlap = UiPrefs.volumeOverlap.coerceIn(0, 40) / 100f
+        val dy = (visible * (1f - overlap)).toInt().coerceAtLeast(1)
         // 直接跳到位，不要 smoothScrollBy 那段动画：翻屏是"换一批内容"，滑过去反而晃眼
         view.scrollBy(0, if (forward) dy else -dy)
         schedulePersist()

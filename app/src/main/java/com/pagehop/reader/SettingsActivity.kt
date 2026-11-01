@@ -146,7 +146,25 @@ class SettingsActivity : AppCompatActivity() {
             arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
             intArrayOf(0x66005E78, 0x339E9E9E),
         )
-        b.swVolume.setOnCheckedChangeListener { _, checked -> UiPrefs.setVolumeKeys(this, checked) }
+        b.swVolume.setOnCheckedChangeListener { _, checked ->
+            UiPrefs.setVolumeKeys(this, checked)
+            // 重叠只在开了音量翻页时才有意义
+            b.boxOverlap.visibility = if (checked) View.VISIBLE else View.GONE
+        }
+        b.tvOverlap.setTextColor(0xFFFFFFFF.toInt())
+        b.boxOverlap.visibility = if (UiPrefs.volumeKeys) View.VISIBLE else View.GONE
+        b.sbOverlap.max = 30
+        b.sbOverlap.progress = UiPrefs.volumeOverlap.coerceIn(0, 30)
+        b.tvOverlap.text = "翻屏重叠：${b.sbOverlap.progress}%"
+        b.sbOverlap.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(s: SeekBar?, p: Int, fromUser: Boolean) {
+                b.tvOverlap.text = "翻屏重叠：$p%"
+                UiPrefs.setVolumeOverlap(this@SettingsActivity, p)
+            }
+
+            override fun onStartTrackingTouch(s: SeekBar?) {}
+            override fun onStopTrackingTouch(s: SeekBar?) {}
+        })
     }
 
     /**

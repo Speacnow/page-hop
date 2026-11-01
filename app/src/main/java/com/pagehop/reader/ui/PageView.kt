@@ -12,7 +12,6 @@ import android.graphics.RectF
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
-import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
@@ -22,7 +21,6 @@ import com.pagehop.reader.data.InkStroke
 import com.pagehop.reader.data.TextNote
 import kotlin.math.abs
 import kotlin.math.max
-import kotlin.math.min
 import kotlin.math.roundToInt
 
 /**
@@ -30,7 +28,7 @@ import kotlin.math.roundToInt
  *
  * - 位图是"整页渲染"，绘制时按 [src] 裁出正文区域填满控件
  * - 颜色模式通过 ColorFilter 在绘制阶段完成
- * - 普通模式：长按拖动 = 框选高亮
+ * - 普通模式：只有单击（切换工具栏）；长按、拖动都不产生任何东西
  * - 手写模式（[penMode]）：手指按下即画，松手成一条笔迹
  */
 class PageView @JvmOverloads constructor(
@@ -97,7 +95,6 @@ class PageView @JvmOverloads constructor(
         }
 
     var onTap: ((Int) -> Unit)? = null
-    var onHighlightDrawn: ((RectF) -> Unit)? = null
     /** 完成一条笔迹：点序列（页面比例） + 笔宽（页面宽度的比例） */
     var onStrokeDrawn: ((List<Float>, Float) -> Unit)? = null
     var onHighlightClicked: ((Highlight) -> Unit)? = null
@@ -135,15 +132,6 @@ class PageView @JvmOverloads constructor(
         strokeCap = Paint.Cap.ROUND
         strokeJoin = Paint.Join.ROUND
     }
-    private val selFill = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.FILL
-        color = 0x33 shl 24
-    }
-    private val selStroke = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.STROKE
-        color = 0xCC shl 24
-        strokeWidth = dp(1.5f)
-    }
     private val errPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = 0xFF8A8A8A.toInt()
         textAlign = Paint.Align.CENTER
@@ -157,11 +145,6 @@ class PageView @JvmOverloads constructor(
 
     private var downX = 0f
     private var downY = 0f
-    private var selecting = false
-    private val selStart = PointF()
-    private val selEnd = PointF()
-
-    private val longPressRunnable = Runnable { startSelection() }
 
     // 手写中的原始点（控件坐标）
     private val rawPoints = ArrayList<Float>(256)
@@ -203,7 +186,6 @@ class PageView @JvmOverloads constructor(
     }
 
     override fun onDetachedFromWindow() {
-        handler.removeCallbacks(longPressRunnable)
         super.onDetachedFromWindow()
     }
 
@@ -267,17 +249,6 @@ class PageView @JvmOverloads constructor(
             inkPaint.color = penColor
             inkPaint.strokeWidth = if (penStrokePx > 0f) penStrokePx else dp(1.9f)
             canvas.drawPath(inkPath, inkPaint)
-        }
-
-        if (selecting) {
-            val r = RectF(
-                min(selStart.x, selEnd.x),
-                min(selStart.y, selEnd.y),
-                max(selStart.x, selEnd.x),
-                max(selStart.y, selEnd.y),
-            )
-            canvas.drawRect(r, selFill)
-            canvas.drawRect(r, selStroke)
         }
     }
 
@@ -477,50 +448,25 @@ class PageView @JvmOverloads constructor(
         inkPath.reset()
     }
 
-    /** 普通阅读模式：长按进入框选，单击切换工具栏 */
+    /** 普通阅读模式：只有"单击切换工具栏"这一种手势；长按不再有任何特效 */
     private fun handleReadTouch(e: MotionEvent): Boolean {
         when (e.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 downX = e.x
                 downY = e.y
-                selecting = false
-                handler.removeCallbacks(longPressRunnable)
-                handler.postDelayed(longPressRunnable, 420)
                 return true
             }
 
-            MotionEvent.ACTION_MOVE -> {
-                if (selecting) {
-                    selEnd.set(
-                        e.x.coerceIn(0f, width.toFloat()),
-                        e.y.coerceIn(0f, height.toFloat()),
-                    )
-                    invalidate()
-                } else if (abs(e.x - downX) > touchSlop || abs(e.y - downY) > touchSlop) {
-                    handler.removeCallbacks(longPressRunnable)
-                }
-                return true
-            }
+            MotionEvent.ACTION_MOVE -> return true
 
             MotionEvent.ACTION_UP -> {
-                handler.removeCallbacks(longPressRunnable)
-                if (selecting) {
-                    finishSelection()
-                } else if (abs(e.x - downX) <= touchSlop && abs(e.y - downY) <= touchSlop) {
+                if (abs(e.x - downX) <= touchSlop && abs(e.y - downY) <= touchSlop) {
                     if (!hitTestAndDispatch(e.x, e.y)) performClick()
                 }
-                selecting = false
-                invalidate()
                 return true
             }
 
-            MotionEvent.ACTION_CANCEL -> {
-                handler.removeCallbacks(longPressRunnable)
-                if (selecting) parent?.requestDisallowInterceptTouchEvent(false)
-                selecting = false
-                invalidate()
-                return true
-            }
+            MotionEvent.ACTION_CANCEL -> return true
         }
         return super.onTouchEvent(e)
     }
@@ -605,33 +551,6 @@ class PageView @JvmOverloads constructor(
             }
         }
         return null
-    }
-
-    private fun startSelection() {
-        if (bitmap == null) return
-        selecting = true
-        selStart.set(downX, downY)
-        selEnd.set(downX, downY)
-        performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-        parent?.requestDisallowInterceptTouchEvent(true)
-        invalidate()
-    }
-
-    private fun finishSelection() {
-        val x0 = min(selStart.x, selEnd.x)
-        val x1 = max(selStart.x, selEnd.x)
-        val y0 = min(selStart.y, selEnd.y)
-        val y1 = max(selStart.y, selEnd.y)
-        if (x1 - x0 > dp(16f) && y1 - y0 > dp(10f)) {
-            val a = viewToFraction(x0, y0)
-            val b = viewToFraction(x1, y1)
-            val rect = RectF(
-                min(a.x, b.x), min(a.y, b.y),
-                max(a.x, b.x), max(a.y, b.y),
-            )
-            onHighlightDrawn?.invoke(rect)
-        }
-        parent?.requestDisallowInterceptTouchEvent(false)
     }
 
     /** 点中笔迹或高亮就走编辑，返回是否命中 */

@@ -1,7 +1,6 @@
 package com.pagehop.reader
 
 import android.graphics.Bitmap
-import android.graphics.RectF
 import android.os.Looper
 import android.os.SystemClock
 import android.view.MotionEvent
@@ -22,7 +21,7 @@ import java.time.Duration
 /**
  * 手势链路测试：真实派发 MotionEvent，验证
  * ①手写模式能把一段拖动变成一条笔迹
- * ②阅读模式长按后拖动会产出框选矩形
+ * ②阅读模式只有单击有意义：长按拖动什么也不产生（v0.9.10 起框选高亮已去掉）
  * 这是"手指画出来到底有没有东西"的最直接验证。
  */
 @RunWith(RobolectricTestRunner::class)
@@ -76,26 +75,11 @@ class GestureTest {
     }
 
     @Test
-    fun `pen mode does not fire the rect highlight callback`() {
-        val pv = newPageView()
-        pv.penMode = true
-        var rect: RectF? = null
-        pv.onHighlightDrawn = { rect = it }
-
-        pv.dispatchTouchEvent(event(MotionEvent.ACTION_DOWN, 100f, 200f))
-        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(600))
-        pv.dispatchTouchEvent(event(MotionEvent.ACTION_MOVE, 400f, 600f))
-        pv.dispatchTouchEvent(event(MotionEvent.ACTION_UP, 400f, 600f))
-
-        assertTrue("手写模式不应产出矩形高亮", rect == null)
-    }
-
-    @Test
-    fun `long press then drag produces a highlighted rect`() {
+    fun `long press then drag draws nothing and does not tap`() {
         val pv = newPageView()
         pv.penMode = false
-        var rect: RectF? = null
-        pv.onHighlightDrawn = { rect = it }
+        var tapped = false
+        pv.onTap = { tapped = true }
 
         pv.dispatchTouchEvent(event(MotionEvent.ACTION_DOWN, 100f, 200f))
         // 让 postDelayed 的长按任务真正跑起来
@@ -103,26 +87,21 @@ class GestureTest {
         pv.dispatchTouchEvent(event(MotionEvent.ACTION_MOVE, 420f, 620f))
         pv.dispatchTouchEvent(event(MotionEvent.ACTION_UP, 420f, 620f))
 
-        val r = rect
-        assertNotNull("长按拖动后应该有框选结果", r)
-        assertTrue(r!!.right > r.left && r.bottom > r.top)
-        assertTrue(r.left >= 0f && r.right <= 1f)
+        // 拖动距离远超 touch slop，不该被当成单击，也不该再产出任何东西
+        assertTrue("长按拖动不应触发单击", !tapped)
     }
 
     @Test
-    fun `quick tap is treated as tap not as selection`() {
+    fun `quick tap is treated as tap`() {
         val pv = newPageView()
         pv.penMode = false
         var tapped = false
-        var rect: RectF? = null
         pv.onTap = { tapped = true }
-        pv.onHighlightDrawn = { rect = it }
 
         pv.dispatchTouchEvent(event(MotionEvent.ACTION_DOWN, 500f, 700f))
         pv.dispatchTouchEvent(event(MotionEvent.ACTION_UP, 500f, 700f))
 
         assertTrue("轻点应触发 onTap", tapped)
-        assertTrue("轻点不应产生框选", rect == null)
     }
 
     private fun two(action: Int, x0: Float, y0: Float, x1: Float, y1: Float): MotionEvent {
