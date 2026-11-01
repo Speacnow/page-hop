@@ -92,6 +92,12 @@ class ReaderActivity : AppCompatActivity() {
         /** 长按历史按钮时弹出的缩略图条数（最近访问列表上限） */
         const val HISTORY_MAX = 6
 
+        /**
+         * 音量键翻屏时上下两屏重叠多少（占一屏的比例）。
+         * 4% 就是"竖屏一屏 1.4 页 → 翻 1.344 页"，刚好让上一屏最后一行留在下一屏顶上。
+         */
+        const val VOLUME_SCROLL_OVERLAP = 0.04f
+
         // 目录面板的三个页签，顺序就是界面上从左到右的顺序
         const val MODE_BOOKMARKS = 0
         const val MODE_TOC = 1
@@ -2392,6 +2398,28 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     /**
+     * 音量键翻"一屏"，不是翻"一页"。
+     *
+     * 屏幕上能放几页，一次就滚几页：竖屏一屏 1.4 页就滚 1.4 页，横屏只看得见半页
+     * 就滚半页。再留一点重叠（[VOLUME_SCROLL_OVERLAP]），上下屏之间有几行接得上，
+     * 不会正好把一句话切在边缘。
+     *
+     * 放大过之后，能看到的列表高度只有 1/scale，按这个算才不会一次滚过头。
+     */
+    private fun scrollByViewport(forward: Boolean) {
+        if (!::adapter.isInitialized) return
+        val view = b.pageList
+        val screen = b.zoomFrame.scale.coerceAtLeast(1f)
+        // 正文区 = 列表高度减掉上下工具栏占用的 padding（工具栏收起时 padding 是 0）
+        val content = (view.height - view.paddingTop - view.paddingBottom)
+            .takeIf { it > 0 } ?: resources.displayMetrics.heightPixels
+        val visible = content / screen
+        val dy = (visible * (1f - VOLUME_SCROLL_OVERLAP)).toInt().coerceAtLeast(1)
+        view.smoothScrollBy(0, if (forward) dy else -dy)
+        schedulePersist()
+    }
+
+    /**
      * 音量键翻页（设置里默认关闭）。
      * 面板 / 弹窗开着时不接管，免得在目录里翻页把面板后面的正文滚走。
      */
@@ -2401,11 +2429,11 @@ class ReaderActivity : AppCompatActivity() {
         ) {
             when (keyCode) {
                 KeyEvent.KEYCODE_VOLUME_UP -> {
-                    goToPage(currentPage - 1)
+                    scrollByViewport(forward = false)
                     return true
                 }
                 KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                    goToPage(currentPage + 1)
+                    scrollByViewport(forward = true)
                     return true
                 }
             }

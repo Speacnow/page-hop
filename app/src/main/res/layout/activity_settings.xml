@@ -110,7 +110,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="音量上 = 上一页、音量下 = 下一页；开着时音量键不再调音量"
+                android:text="音量上 = 往前一屏、音量下 = 往后一屏（按屏幕上能看到的正文高度翻，上下留一点重叠）；开着时音量键不再调音量"
                 android:textColor="#99FFFFFF"
                 android:textSize="11sp" />
 
