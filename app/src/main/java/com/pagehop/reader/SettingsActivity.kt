@@ -281,7 +281,7 @@ class SettingsActivity : AppCompatActivity() {
     private fun dotRow(colors: List<Int>, initial: Int, onPick: (Int) -> Unit): LinearLayout {
         var selected = initial
         val wrap = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        val dots = ArrayList<Pair<View, Int>>()
+        val dots = ArrayList<Triple<View, View, Int>>()
 
         // 内容区两侧各 20dp padding（见 activity_settings.xml）
         val usable = (resources.displayMetrics.widthPixels - px(40)).coerceAtLeast(px(120))
@@ -291,17 +291,13 @@ class SettingsActivity : AppCompatActivity() {
         val cell = usable / cols
 
         fun paintDots() {
-            for ((view, color) in dots) {
-                val picked = color == selected
-                view.background = GradientDrawable().apply {
+            for ((dot, ringView, color) in dots) {
+                dot.background = GradientDrawable().apply {
                     shape = GradientDrawable.OVAL
                     setColor(color)
-                    val lum = 0.299f * android.graphics.Color.red(color) +
-                        0.587f * android.graphics.Color.green(color) +
-                        0.114f * android.graphics.Color.blue(color)
-                    val ring = if (lum > 170f) 0xFF202020.toInt() else 0xFFFFFFFF.toInt()
-                    setStroke(px(if (picked) 3 else 1), if (picked) ring else 0x33FFFFFF)
+                    setStroke(px(1), 0x33FFFFFF)
                 }
+                ringView.visibility = if (color == selected) View.VISIBLE else View.GONE
             }
         }
 
@@ -310,13 +306,27 @@ class SettingsActivity : AppCompatActivity() {
             for (c in chunk) {
                 // 每格等宽，色块在格子里居中 → 整行正好铺满
                 val cellView = FrameLayout(this)
+                // 选中环画在色块"外面"：白色环压在深色面板上永远看得见，
+                // 不会因为选中了浅色（樱花粉 / 白）而和色块糊成一片
+                val ringView = View(this).apply {
+                    visibility = View.GONE
+                    background = GradientDrawable().apply {
+                        shape = GradientDrawable.OVAL
+                        setColor(0x00000000)
+                        setStroke(px(2), 0xFFFFFFFF.toInt())
+                    }
+                }
+                cellView.addView(
+                    ringView,
+                    FrameLayout.LayoutParams(px(46), px(46)).apply { gravity = Gravity.CENTER },
+                )
                 val dot = View(this)
                 cellView.addView(
                     dot,
                     FrameLayout.LayoutParams(px(38), px(38)).apply { gravity = Gravity.CENTER },
                 )
-                row.addView(cellView, LinearLayout.LayoutParams(cell, px(38 + 18)))
-                dots.add(dot to c)
+                row.addView(cellView, LinearLayout.LayoutParams(cell, px(46 + 10)))
+                dots.add(Triple(dot, ringView, c))
                 cellView.setOnClickListener {
                     selected = c
                     paintDots()

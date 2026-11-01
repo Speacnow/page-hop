@@ -35,15 +35,15 @@ object UiPrefs {
      * 注意这里"锁定"是**锁死在某个方向**，不是把控制权交还给系统——
      * 系统那个"自动旋转"开关对本 App 完全无效（符合"旋转独立于系统"的要求）。
      */
-    var rotateAuto: Boolean = false
+    var rotateAuto: Boolean = true
         private set
 
     /** 锁定时是不是横屏：默认 false（竖屏），和之前"系统锁竖屏时 App 也是竖屏"一致 */
     var rotateLockLandscape: Boolean = false
         private set
 
-    /** 音量键翻页：默认关闭，开了之后音量上=上一页、音量下=下一页 */
-    var volumeKeys: Boolean = false
+    /** 音量键翻页：默认开启（音量上 = 往前一屏、音量下 = 往后一屏） */
+    var volumeKeys: Boolean = true
         private set
 
     /**
@@ -64,10 +64,10 @@ object UiPrefs {
      * 非批注模式下点屏幕翻页：屏幕中间一半还是"开关工具栏"，
      * 两侧/上下四分之一是翻页。
      */
-    var tapPaging: Boolean = false
+    var tapPaging: Boolean = true
         private set
 
-    /** 触摸翻页方向：true = 左右（左往前、右往后），false = 上下（上往前、下往后） */
+    /** 触摸翻页方向：true = 左右（左往前、右往后），false = 上下（上往前、下往后，默认） */
     var tapPagingHorizontal: Boolean = false
         private set
 
@@ -75,28 +75,28 @@ object UiPrefs {
     var flipHint: Boolean = true
         private set
 
-    /** 提示线左右各留多少白（屏幕宽度的百分比，默认 2%） */
-    var flipHintInset: Int = 2
+    /** 提示线左右各留多少白（屏幕宽度的百分比，默认 3%） */
+    var flipHintInset: Int = 3
         private set
 
-    /** 提示线的不透明度（百分比，100 = 不透明） */
-    var flipHintAlpha: Int = 100
+    /** 提示线的不透明度（百分比，100 = 不透明；默认 40，淡一点不抢字） */
+    var flipHintAlpha: Int = 40
         private set
 
-    /** 提示线粗细（dp） */
-    var flipHintWidth: Int = 3
+    /** 提示线粗细（dp，默认 2） */
+    var flipHintWidth: Int = 2
         private set
 
     /** 提示线颜色 */
-    var flipHintColor: Int = 0xFFFF3B30.toInt()
+    var flipHintColor: Int = 0xFFFFB7C5.toInt() // 樱花粉
         private set
 
     /** 长按预览大图的透明度：越小越透（0 = 全透明，1 = 不透明） */
-    var previewAlpha: Float = 0.32f
+    var previewAlpha: Float = 0.7f
         private set
 
     /** 缩略图面板上次用的列数（下次打开沿用） */
-    var thumbSpans: Int = 4
+    var thumbSpans: Int = 5
         private set
 
     /** 长按预览时是否画红色棋盘格线 */
@@ -104,11 +104,11 @@ object UiPrefs {
         private set
 
     /** 棋盘格线颜色 */
-    var gridColor: Int = 0xFFE53935.toInt()
+    var gridColor: Int = 0xFFFFB7C5.toInt() // 樱花粉
         private set
 
     /** 顶栏/底栏背景色 */
-    var barColor: Int = 0xFF005E78.toInt()
+    var barColor: Int = 0xFFFFB7C5.toInt() // 樱花粉
         private set
 
     /** 顶栏/底栏上前景（图标、文字）颜色 */
@@ -140,6 +140,7 @@ object UiPrefs {
         "紫" to 0xFFBF5AF2.toInt(),
         "黑" to 0xFF1C1C1E.toInt(),
         "白" to 0xFFFFFFFF.toInt(),
+        "樱花粉" to 0xFFFFB7C5.toInt(),
     )
 
     /** 棋盘格线颜色候选 */
@@ -150,27 +151,28 @@ object UiPrefs {
         "绿" to 0xFF43A047.toInt(),
         "蓝" to 0xFF1E88E5.toInt(),
         "白" to 0xFFFFFFFF.toInt(),
+        "樱花粉" to 0xFFFFB7C5.toInt(),
     )
 
     fun load(ctx: Context) {
         val p = ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
-        previewAlpha = p.getFloat(K_ALPHA, 0.32f).coerceIn(0f, 1f)
-        thumbSpans = p.getInt(K_SPANS, 4)
-        volumeKeys = p.getBoolean(K_VOLUME, false)
+        previewAlpha = p.getFloat(K_ALPHA, 0.7f).coerceIn(0f, 1f)
+        thumbSpans = p.getInt(K_SPANS, 5)
+        volumeKeys = p.getBoolean(K_VOLUME, true)
         volumeOverlap = p.getInt(K_VOLUME_OVERLAP, 10).coerceIn(0, 40)
         cornerButton = p.getBoolean(K_CORNER_BTN, true)
-        tapPaging = p.getBoolean(K_TAP_PAGING, false)
+        tapPaging = p.getBoolean(K_TAP_PAGING, true)
         tapPagingHorizontal = p.getBoolean(K_TAP_HORIZ, false)
         flipHint = p.getBoolean(K_FLIP_HINT, true)
-        flipHintInset = p.getInt(K_HINT_INSET, 2).coerceIn(0, 20)
-        flipHintAlpha = p.getInt(K_HINT_ALPHA, 100).coerceIn(10, 100)
-        flipHintWidth = p.getInt(K_HINT_WIDTH, 3).coerceIn(1, 12)
-        flipHintColor = p.getInt(K_HINT_COLOR, 0xFFFF3B30.toInt())
-        rotateAuto = p.getBoolean(K_ROTATE_AUTO, false)
+        flipHintInset = p.getInt(K_HINT_INSET, 3).coerceIn(0, 20)
+        flipHintAlpha = p.getInt(K_HINT_ALPHA, 40).coerceIn(10, 100)
+        flipHintWidth = p.getInt(K_HINT_WIDTH, 2).coerceIn(1, 12)
+        flipHintColor = p.getInt(K_HINT_COLOR, 0xFFFFB7C5.toInt())
+        rotateAuto = p.getBoolean(K_ROTATE_AUTO, true)
         rotateLockLandscape = p.getBoolean(K_ROTATE_LAND, false)
         gridLines = p.getBoolean(K_GRID, true)
-        gridColor = p.getInt(K_GRID_COLOR, 0xFFE53935.toInt())
-        barColor = p.getInt(K_BAR, 0xFF005E78.toInt())
+        gridColor = p.getInt(K_GRID_COLOR, 0xFFFFB7C5.toInt())
+        barColor = p.getInt(K_BAR, 0xFFFFB7C5.toInt())
         // 前景色不存了，直接按背景亮度算：老数据里手工配的浅色前景会在这里自动纠正
         barContent = contentFor(barColor)
     }
