@@ -2410,12 +2410,14 @@ class ReaderActivity : AppCompatActivity() {
         if (!::adapter.isInitialized) return
         val view = b.pageList
         val screen = b.zoomFrame.scale.coerceAtLeast(1f)
-        // 正文区 = 列表高度减掉上下工具栏占用的 padding（工具栏收起时 padding 是 0）
-        val content = (view.height - view.paddingTop - view.paddingBottom)
-            .takeIf { it > 0 } ?: resources.displayMetrics.heightPixels
+        // 正文区 = 列表高度减掉上下工具栏占用的 padding（工具栏收起时 padding 是 0）。
+        // 全部现算：换机型、转屏、收起工具栏、缩放之后都跟着变，没有任何写死的像素。
+        val h = view.height.takeIf { it > 0 } ?: resources.displayMetrics.heightPixels
+        val content = (h - view.paddingTop - view.paddingBottom).coerceAtLeast(1)
         val visible = content / screen
         val dy = (visible * (1f - VOLUME_SCROLL_OVERLAP)).toInt().coerceAtLeast(1)
-        view.smoothScrollBy(0, if (forward) dy else -dy)
+        // 直接跳到位，不要 smoothScrollBy 那段动画：翻屏是"换一批内容"，滑过去反而晃眼
+        view.scrollBy(0, if (forward) dy else -dy)
         schedulePersist()
     }
 
