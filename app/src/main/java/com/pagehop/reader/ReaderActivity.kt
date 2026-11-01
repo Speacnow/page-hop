@@ -2418,9 +2418,9 @@ class ReaderActivity : AppCompatActivity() {
         // 还没停满 1 秒就换页：这次主动跳转作废
         cancelPendingJump()
         currentPage = p
-        // 逐页读到这里：记录点跟着走（但不新增条目），否则"打开书停在哪页"会一直赖在
-        // 历史里，真正跳转时的来源页也会被记成打开页。跳转目标页、拖进度条途中的
-        // 中间页不算"读到这里"，锚点要留在起跳页。
+        // 逐页读到这里：记录点跟着走，这样后退回的是上一次跳转的起点；
+        // 但最近跳转列表不动 —— 列表只装跳转的两端。跳转目标页、拖进度条途中的
+        // 中间页更不能算"读到这里"，锚点要留在起跳页。
         if (!jumping && !draggingSeek) history.moveTo(p)
         updateIndicator()
     }
@@ -2477,8 +2477,11 @@ class ReaderActivity : AppCompatActivity() {
      */
     private fun showHistoryDialog() {
         val pages = history.recentPages().take(6)
-        if (pages.isEmpty()) return
-
+        if (pages.isEmpty()) {
+            // 列表只装跳转的两端：打开书、逐页阅读都不算，所以第一次跳转之前是空的
+            Toast.makeText(this, "还没有跳转记录", Toast.LENGTH_SHORT).show()
+            return
+        }
         val dm = resources.displayMetrics
         val density = dm.density
         val landscape = dm.widthPixels > dm.heightPixels

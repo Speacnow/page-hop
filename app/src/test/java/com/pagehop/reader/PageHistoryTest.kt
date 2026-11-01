@@ -142,14 +142,15 @@ class PageHistoryTest {
     }
 
     @Test
-    fun `reading away from the record point carries it along`() {
+    fun `reading away from the last jump point moves the anchor but not the list`() {
         val h = PageHistory()
         h.reset(0)
         h.jump(0, 5)
-        // 从第 6 页一路读到第 19 页：记录点跟着走，不能还赖在跳转落点上
+        assertEquals(listOf(5, 0), h.recentPages())
+        // 从第 6 页一路读到第 19 页：列表里不该多出这些页
         for (p in 6..18) h.moveTo(p)
-        assertEquals(listOf(18, 0), h.recentPages())
-        // 后退：回到上一次真正跳转的地方，而不是刚读过去的第 6 页
+        assertEquals(listOf(5, 0), h.recentPages())
+        // 但记录点跟着走了：后退回到上次跳转的起点，而不是刚读过去的第 6 页
         assertEquals(0, h.back(18))
     }
 
@@ -167,13 +168,14 @@ class PageHistoryTest {
     }
 
     @Test
-    fun `reopening a book and reading on leaves no trace of the opening page`() {
+    fun `opening a book does not create a history entry`() {
         val h = PageHistory()
         h.reset(39) // 上次停在第 40 页
+        assertTrue(h.recentPages().isEmpty())
         h.moveTo(40) // 翻到第 41 页
-        assertEquals(listOf(40), h.recentPages())
         h.moveTo(41)
-        assertEquals(listOf(41), h.recentPages())
+        // 打开、沿途翻页都不是跳转，列表还是空的
+        assertTrue(h.recentPages().isEmpty())
     }
 
     @Test
@@ -187,11 +189,14 @@ class PageHistoryTest {
     }
 
     @Test
-    fun `moving onto a page already in the recent list does not duplicate it`() {
+    fun `reading on after a jump leaves the list at the two jump ends`() {
         val h = PageHistory()
-        h.reset(0)
-        h.jump(0, 10)
-        h.moveTo(0) // 读回第 1 页
-        assertEquals(listOf(0), h.recentPages())
+        h.reset(59) // 第 60 页
+        h.jump(59, 79) // 跳到第 80 页
+        assertEquals(listOf(79, 59), h.recentPages())
+        // 从第 80 页读到第 83 页
+        for (p in 80..82) h.moveTo(p)
+        assertEquals(listOf(79, 59), h.recentPages()) // 仍然是 60、80
+        assertEquals(59, h.back(82)) // 后退回这次跳转的起点，不是刚读过的 80
     }
 }
