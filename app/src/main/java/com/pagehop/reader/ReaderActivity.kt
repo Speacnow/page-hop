@@ -126,6 +126,9 @@ class ReaderActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // 先把方向定下来再搭界面：否则会先按系统方向铺一遍、再翻过来，看得见闪一下
+        UiPrefs.load(this)
+        applyRotation()
         b = ActivityReaderBinding.inflate(layoutInflater)
         setContentView(b.root)
         enableImmersiveMode()
@@ -210,7 +213,7 @@ class ReaderActivity : AppCompatActivity() {
         b.btnPageForward.setOnClickListener { goForward() }
         b.btnPageForward.setOnLongClickListener { showHistoryDialog(); true }
         // 自动旋转：手机锁了竖屏也能跟着重力转
-        b.btnRotate.setOnClickListener { toggleAutoRotate() }
+        b.btnRotate.setOnClickListener { toggleRotateLock() }
         // 单击 = 开关手写批注；长按 = 弹出批注菜单（颜色 / 列表 / 清除本页）
         b.btnHighlight.setOnClickListener { if (penMode) exitPenMode() else enterPenMode() }
         b.btnHighlight.setOnLongClickListener {
@@ -766,27 +769,51 @@ class ReaderActivity : AppCompatActivity() {
         popup.show()
     }
 
-    // ---------------- 自动旋转 ----------------
+    // ---------------- 自动旋转 / 旋转锁定 ----------------
 
-    private var autoRotate = false
+    /** 当前这台设备的"物理方向"（用窗口宽高判断，比 configuration 更直接） */
+    private fun isLandscapeNow(): Boolean {
+        val dm = resources.displayMetrics
+        return dm.widthPixels > dm.heightPixels
+    }
 
     /**
-     * 自动旋转：置为 SCREEN_ORIENTATION_SENSOR 后，即使系统开了"竖屏锁定"，
-     * 本页面也会跟随重力传感器转。关掉时回到 UNSPECIFIED，交还给系统设置。
+     * 把 App 的旋转模式落到窗口上。
+     *
+     * 三条规则都靠这里实现：
+     * - 自动：SCREEN_ORIENTATION_SENSOR —— 跟着重力走，**忽略系统的"自动旋转"开关**
+     * - 锁定：SCREEN_ORIENTATION_PORTRAIT / LANDSCAPE —— 钉死在某个方向，系统转动也不理
+     * - 从不使用 UNSPECIFIED —— 那会把控制权交回系统，也就受系统开关影响了
      */
-    private fun toggleAutoRotate() {
-        autoRotate = !autoRotate
-        requestedOrientation = if (autoRotate) {
-            ActivityInfo.SCREEN_ORIENTATION_SENSOR
-        } else {
-            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+    private fun applyRotation() {
+        requestedOrientation = when {
+            UiPrefs.rotateAuto -> ActivityInfo.SCREEN_ORIENTATION_SENSOR
+            UiPrefs.rotateLockLandscape -> ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            else -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
-        updateRotateStyle()
-        Toast.makeText(
-            this,
-            if (autoRotate) "自动旋转已开启（忽略系统竖屏锁定）" else "自动旋转已关闭",
-            Toast.LENGTH_SHORT,
-        ).show()
+        if (::b.isInitialized) updateRotateStyle()
+    }
+
+    /**
+     * 一个按钮两种状态：
+     * - 自动中 → 点一下 = **锁定当前方向**（横着就锁横、竖着就锁竖）
+     * - 锁定中 → 点一下 = 解除锁定，恢复跟随重力
+     */
+    private fun toggleRotateLock() {
+        if (UiPrefs.rotateAuto) {
+            val landscape = isLandscapeNow()
+            UiPrefs.setRotateMode(this, auto = false, lockLandscape = landscape)
+            applyRotation()
+            Toast.makeText(
+                this,
+                if (landscape) "已锁定横屏（不受系统旋转影响）" else "已锁定竖屏（不受系统旋转影响）",
+                Toast.LENGTH_SHORT,
+            ).show()
+        } else {
+            UiPrefs.setRotateMode(this, auto = true, lockLandscape = UiPrefs.rotateLockLandscape)
+            applyRotation()
+            Toast.makeText(this, "自动旋转已开启：跟随手机姿态", Toast.LENGTH_SHORT).show()
+        }
     }
 
     // ---------------- 震动 ----------------
@@ -811,11 +838,11 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     /**
-     * 自动旋转按钮只换图标：开着是"旋转箭头"，关着是"钉子"（钉住方向）。
+     * 自动旋转按钮只换图标：自动是"旋转箭头"，锁定是"钉子"。
      * 不做高亮底色——之前那个青色方块看着像"选中项"，不像开关。
      */
     private fun updateRotateStyle() {
-        b.ivRotate.setImageResource(if (autoRotate) R.drawable.ic_rotate else R.drawable.ic_pin)
+        b.ivRotate.setImageResource(if (UiPrefs.rotateAuto) R.drawable.ic_rotate else R.drawable.ic_pin)
         b.ivRotate.setColorFilter(UiPrefs.barContent)
         b.btnRotate.setBackgroundResource(0)
     }

@@ -16,6 +16,22 @@ object UiPrefs {
     private const val K_BAR_FG = "bar_content"
     private const val K_SPANS = "thumb_spans"
     private const val K_VOLUME = "volume_keys"
+    private const val K_ROTATE_AUTO = "rotate_auto"
+    private const val K_ROTATE_LAND = "rotate_lock_landscape"
+
+    /**
+     * 旋转模式：true = 跟随设备重力（SCREEN_ORIENTATION_SENSOR），
+     * false = 锁定方向（[rotateLockLandscape] 决定锁横还是锁竖）。
+     *
+     * 注意这里"锁定"是**锁死在某个方向**，不是把控制权交还给系统——
+     * 系统那个"自动旋转"开关对本 App 完全无效（符合"旋转独立于系统"的要求）。
+     */
+    var rotateAuto: Boolean = false
+        private set
+
+    /** 锁定时是不是横屏：默认 false（竖屏），和之前"系统锁竖屏时 App 也是竖屏"一致 */
+    var rotateLockLandscape: Boolean = false
+        private set
 
     /** 音量键翻页：默认关闭，开了之后音量上=上一页、音量下=下一页 */
     var volumeKeys: Boolean = false
@@ -75,6 +91,8 @@ object UiPrefs {
         previewAlpha = p.getFloat(K_ALPHA, 0.32f).coerceIn(0f, 1f)
         thumbSpans = p.getInt(K_SPANS, 4)
         volumeKeys = p.getBoolean(K_VOLUME, false)
+        rotateAuto = p.getBoolean(K_ROTATE_AUTO, false)
+        rotateLockLandscape = p.getBoolean(K_ROTATE_LAND, false)
         gridLines = p.getBoolean(K_GRID, true)
         gridColor = p.getInt(K_GRID_COLOR, 0xFFE53935.toInt())
         barColor = p.getInt(K_BAR, 0xFF005E78.toInt())
@@ -107,6 +125,13 @@ object UiPrefs {
     fun setVolumeKeys(ctx: Context, on: Boolean) {
         volumeKeys = on
         edit(ctx).putBoolean(K_VOLUME, on).apply()
+    }
+
+    /** 切换旋转模式：auto=true 跟随重力；auto=false 锁死在 lockLandscape 指定的方向 */
+    fun setRotateMode(ctx: Context, auto: Boolean, lockLandscape: Boolean) {
+        rotateAuto = auto
+        rotateLockLandscape = lockLandscape
+        edit(ctx).putBoolean(K_ROTATE_AUTO, auto).putBoolean(K_ROTATE_LAND, lockLandscape).apply()
     }
 
     fun setBarTheme(ctx: Context, bg: Int) {
