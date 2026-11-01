@@ -146,20 +146,38 @@
             </LinearLayout>
 
             <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/swCorner"
+                android:id="@+id/swFlipHint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="18dp"
                 android:paddingTop="6dp"
                 android:paddingBottom="6dp"
-                android:text="批注时显示左下角翻页按钮"
+                android:text="翻页分界提示线"
                 android:textColor="#FFFFFFFF"
                 android:textSize="15sp" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="批注状态下才出现：短按往后一屏，长按或双击往前一屏。工具栏收起时贴屏幕左下角，展开时自动让到底栏上方"
+                android:text="每翻完一屏，在上一屏结束的位置闪一条红线，停 2 秒。音量键、点屏幕两侧、右下角按钮翻页都会显示"
+                android:textColor="#99FFFFFF"
+                android:textSize="11sp" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/swCorner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:text="批注时显示右下角翻页按钮"
+                android:textColor="#FFFFFFFF"
+                android:textSize="15sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="批注状态下才出现：短按往后一屏，长按或双击往前一屏。工具栏收起时贴屏幕右下角，展开时自动让到底栏上方"
                 android:textColor="#99FFFFFF"
                 android:textSize="11sp" />
 

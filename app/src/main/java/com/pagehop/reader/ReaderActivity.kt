@@ -535,7 +535,7 @@ class ReaderActivity : AppCompatActivity() {
     /** 翻页分界提示线（叠在正文上，翻完自动淡出） */
     private var flipHint: View? = null
 
-    /** 批注模式下左下角的翻页按钮 */
+    /** 批注模式下右下角的翻页按钮 */
     private var cornerBtn: android.widget.ImageButton? = null
 
     private var topBarH = 0
@@ -2419,7 +2419,7 @@ class ReaderActivity : AppCompatActivity() {
      *
      * 放大过之后，能看到的列表高度只有 1/scale，按这个算才不会一次滚过头。
      */
-    private fun scrollByViewport(forward: Boolean, showHint: Boolean = false) {
+    private fun scrollByViewport(forward: Boolean) {
         if (!::adapter.isInitialized) return
         val view = b.pageList
         val screen = b.zoomFrame.scale.coerceAtLeast(1f)
@@ -2433,7 +2433,7 @@ class ReaderActivity : AppCompatActivity() {
         val dy = (visible * (1f - overlap)).toInt().coerceAtLeast(1)
         // 直接跳到位，不要 smoothScrollBy 那段动画：翻屏是"换一批内容"，滑过去反而晃眼
         view.scrollBy(0, if (forward) dy else -dy)
-        if (showHint) showFlipHint(forward, dy, content)
+        showFlipHint(forward, dy, content)
         schedulePersist()
     }
 
@@ -2444,11 +2444,18 @@ class ReaderActivity : AppCompatActivity() {
      * 往下翻时（退回上一屏），之前那一屏的顶部落在 `正文顶 + dy`。
      */
     private fun showFlipHint(forward: Boolean, dy: Int, content: Int) {
+        if (!UiPrefs.flipHint) {
+            flipHint?.visibility = View.GONE
+            return
+        }
+        val d = resources.displayMetrics.density
         val line = flipHint ?: View(this).apply {
-            setBackgroundColor(0xE6FF5252.toInt())
+            setBackgroundColor(0xFFFF3B30.toInt())
+            // 线上再加一段浅色描边，浅色纸面上也一眼能看到
+            elevation = 8 * d
             layoutParams = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                (2 * resources.displayMetrics.density).toInt().coerceAtLeast(2),
+                (3 * d).toInt().coerceAtLeast(3),
                 Gravity.TOP,
             )
             visibility = View.GONE
@@ -2461,7 +2468,7 @@ class ReaderActivity : AppCompatActivity() {
         line.translationY = y.toFloat()
         line.alpha = 1f
         line.visibility = View.VISIBLE
-        line.animate().alpha(0f).setStartDelay(1100).setDuration(450)
+        line.animate().alpha(0f).setStartDelay(2000).setDuration(500)
             .withEndAction { line.visibility = View.GONE }
             .start()
     }
@@ -2493,13 +2500,13 @@ class ReaderActivity : AppCompatActivity() {
     // ---------------- 左下角翻页按钮 ----------------
 
     /**
-     * 批注模式下左下角的翻页按钮：短按往后一屏，长按 / 双击往前一屏。
+     * 批注模式下右下角的翻页按钮：短按往后一屏，长按 / 双击往前一屏。
      *
-     * 工具栏收起来时贴屏幕最左下角，展开时让到底栏上方 —— 批注时工具栏一收，
-     * 手指够到左上角很难，翻页按钮就在手边。
+     * 工具栏收起来时贴屏幕最右下角，展开时让到底栏上方 —— 批注时工具栏一收，
+     * 手指够到右边很难，翻页按钮就在手边。
      */
     private fun setupCornerButton() {
-        val size = (56 * resources.displayMetrics.density).toInt()
+        val size = (30 * resources.displayMetrics.density).toInt()
         val btn = android.widget.ImageButton(this).apply {
             background = GradientDrawable().apply {
                 shape = GradientDrawable.OVAL
@@ -2536,7 +2543,7 @@ class ReaderActivity : AppCompatActivity() {
                 true
             }
         }
-        b.root.addView(btn, FrameLayout.LayoutParams(size, size, Gravity.BOTTOM or Gravity.START))
+        b.root.addView(btn, FrameLayout.LayoutParams(size, size, Gravity.BOTTOM or Gravity.END))
         cornerBtn = btn
         updateCornerButton()
     }
@@ -2549,9 +2556,11 @@ class ReaderActivity : AppCompatActivity() {
         if (!show) return
         val lp = (btn.layoutParams as? FrameLayout.LayoutParams) ?: return
         val barH = if (barsVisible) maxOf(bottomBarH, b.bottomBar.height) else 0
-        lp.leftMargin = (10 * resources.displayMetrics.density).toInt()
-        lp.bottomMargin = barH + (12 * resources.displayMetrics.density).toInt()
-        lp.gravity = Gravity.BOTTOM or Gravity.START
+        val d = resources.displayMetrics.density
+        lp.leftMargin = 0
+        lp.rightMargin = (10 * d).toInt()
+        lp.bottomMargin = barH + (12 * d).toInt()
+        lp.gravity = Gravity.BOTTOM or Gravity.END
         btn.layoutParams = lp
     }
 
@@ -2565,11 +2574,11 @@ class ReaderActivity : AppCompatActivity() {
         ) {
             when (keyCode) {
                 KeyEvent.KEYCODE_VOLUME_UP -> {
-                    scrollByViewport(forward = false, showHint = true)
+                    scrollByViewport(forward = false)
                     return true
                 }
                 KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                    scrollByViewport(forward = true, showHint = true)
+                    scrollByViewport(forward = true)
                     return true
                 }
             }

@@ -105,6 +105,7 @@ class SettingsActivity : AppCompatActivity() {
         b.tvAlpha.setTextColor(0xFFFFFFFF.toInt())
         b.swGrid.setTextColor(0xFFFFFFFF.toInt())
         b.swVolume.setTextColor(0xFFFFFFFF.toInt())
+        b.swFlipHint.setTextColor(0xFFFFFFFF.toInt())
         b.swCorner.setTextColor(0xFFFFFFFF.toInt())
         b.swTapPaging.setTextColor(0xFFFFFFFF.toInt())
         b.swTapHorizontal.setTextColor(0xFFFFFFFF.toInt())
@@ -181,10 +182,13 @@ class SettingsActivity : AppCompatActivity() {
             arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
             intArrayOf(0x66005E78, 0x339E9E9E),
         )
-        for (sw in arrayOf(b.swCorner, b.swTapPaging, b.swTapHorizontal)) {
+        for (sw in arrayOf(b.swFlipHint, b.swCorner, b.swTapPaging, b.swTapHorizontal)) {
             sw.thumbTintList = thumbs
             sw.trackTintList = tracks
         }
+
+        b.swFlipHint.isChecked = UiPrefs.flipHint
+        b.swFlipHint.setOnCheckedChangeListener { _, on -> UiPrefs.setFlipHint(this, on) }
 
         b.swCorner.isChecked = UiPrefs.cornerButton
         b.swCorner.setOnCheckedChangeListener { _, on -> UiPrefs.setCornerButton(this, on) }

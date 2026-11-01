@@ -20,6 +20,7 @@ object UiPrefs {
     private const val K_CORNER_BTN = "corner_button"
     private const val K_TAP_PAGING = "tap_paging"
     private const val K_TAP_HORIZ = "tap_paging_horizontal"
+    private const val K_FLIP_HINT = "flip_hint"
     private const val K_ROTATE_AUTO = "rotate_auto"
     private const val K_ROTATE_LAND = "rotate_lock_landscape"
 
@@ -64,6 +65,10 @@ object UiPrefs {
 
     /** 触摸翻页方向：true = 左右（左往前、右往后），false = 上下（上往前、下往后） */
     var tapPagingHorizontal: Boolean = false
+        private set
+
+    /** 翻完一屏画一条分界线，标出上一屏到哪儿结束（默认开） */
+    var flipHint: Boolean = true
         private set
 
     /** 长按预览大图的透明度：越小越透（0 = 全透明，1 = 不透明） */
@@ -124,6 +129,7 @@ object UiPrefs {
         cornerButton = p.getBoolean(K_CORNER_BTN, true)
         tapPaging = p.getBoolean(K_TAP_PAGING, false)
         tapPagingHorizontal = p.getBoolean(K_TAP_HORIZ, false)
+        flipHint = p.getBoolean(K_FLIP_HINT, true)
         rotateAuto = p.getBoolean(K_ROTATE_AUTO, false)
         rotateLockLandscape = p.getBoolean(K_ROTATE_LAND, false)
         gridLines = p.getBoolean(K_GRID, true)
@@ -179,6 +185,11 @@ object UiPrefs {
     fun setTapPagingHorizontal(ctx: Context, horizontal: Boolean) {
         tapPagingHorizontal = horizontal
         edit(ctx).putBoolean(K_TAP_HORIZ, horizontal).apply()
+    }
+
+    fun setFlipHint(ctx: Context, on: Boolean) {
+        flipHint = on
+        edit(ctx).putBoolean(K_FLIP_HINT, on).apply()
     }
 
     /** 切换旋转模式：auto=true 跟随重力；auto=false 锁死在 lockLandscape 指定的方向 */
