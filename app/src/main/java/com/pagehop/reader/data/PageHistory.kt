@@ -9,7 +9,8 @@ package com.pagehop.reader.data
  *  - [recent]：展示用的"最近访问"列表，去重、最近的在前，最多 [maxRecent] 条。
  *
  * 只有"主动定点跳转"（输页码、点目录 / 书签、文档内链、历史列表）并且在新页面
- * 停留满一段时间之后，才会调用 [commit] 写入。逐页翻页、拖进度条不进历史。
+ * 停留满一段时间之后，才会调用 [commit] 写入。逐页翻页、拖进度条不进历史，
+ * 但它们把位置挪走了 —— 用 [moveTo] 让记录点跟着走，别让记录点赖在打开书的那一页。
  */
 class PageHistory(
     private val maxRecent: Int = 6,
@@ -34,6 +35,32 @@ class PageHistory(
 
     /** 指针所在那一格（记录点） */
     private val here: Int get() = stack.getOrNull(index) ?: -1
+
+    /**
+     * 单纯"读到了这一页"（滚动、翻页、音量键、拖进度条途中）：记录点跟着走，
+     * 但不新增条目 —— 只有主动跳转才值得留一条。
+     *
+     * 以前这里什么都不做，于是"打开书停在第 40 页、一路读到第 45 页"之后，
+     * 记录点还赖在第 40 页：长按箭头的列表里永远是 40，真正跳转时来源也会被
+     * 记成 40 而不是起跳的第 45 页。
+     *
+     * 指针不在栈尾（还有"前进"路径）时不跟着走，否则会把前进路径踩掉。
+     */
+    fun moveTo(page: Int) {
+        if (index < 0 || index != stack.size - 1) return
+        val old = stack[index]
+        if (old == page) return
+        stack[index] = page
+        // 展示列表里原地换掉，别每读一页就多塞一条
+        recent.remove(page)
+        if (recent.firstOrNull() == old) {
+            recent[0] = page
+        } else {
+            recent.remove(old)
+            recent.add(0, page)
+            while (recent.size > maxRecent) recent.removeAt(recent.size - 1)
+        }
+    }
 
     /** 后退可用：要么指针不在栈头，要么当前页已经滚离了记录点（先回记录点） */
     fun canGoBack(current: Int): Boolean =
@@ -60,8 +87,13 @@ class PageHistory(
         while (stack.size > maxStack) stack.removeAt(0)
         index = stack.size - 1
 
+        // 展示列表：落点排最前，起跳点紧随其后 —— 跳的之前和跳之后都要留着
         recent.remove(page)
         recent.add(0, page)
+        if (from >= 0) {
+            recent.remove(from)
+            recent.add(1.coerceAtMost(recent.size), from)
+        }
         while (recent.size > maxRecent) recent.removeAt(recent.size - 1)
     }
 

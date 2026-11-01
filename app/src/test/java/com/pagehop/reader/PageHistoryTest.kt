@@ -142,11 +142,56 @@ class PageHistoryTest {
     }
 
     @Test
-    fun `scrolling away from the record point lights up back`() {
+    fun `reading away from the record point carries it along`() {
         val h = PageHistory()
         h.reset(0)
         h.jump(0, 5)
-        assertEquals(5, h.back(18)) // 先回记录点
-        assertEquals(0, h.back(5)) // 再退就是栈里的上一个点
+        // 从第 6 页一路读到第 19 页：记录点跟着走，不能还赖在跳转落点上
+        for (p in 6..18) h.moveTo(p)
+        assertEquals(listOf(18, 0), h.recentPages())
+        // 后退：回到上一次真正跳转的地方，而不是刚读过去的第 6 页
+        assertEquals(0, h.back(18))
+    }
+
+    @Test
+    fun `reading after going back keeps the forward path`() {
+        val h = PageHistory()
+        h.reset(0)
+        h.jump(0, 10)
+        h.jump(10, 20)
+        assertEquals(10, h.back(20))
+        // 后退之后又往前翻了两页：不该把"前进到第 21 页"这条路径踩掉
+        h.moveTo(12)
+        assertTrue(h.canGoForward())
+        assertEquals(20, h.forward())
+    }
+
+    @Test
+    fun `reopening a book and reading on leaves no trace of the opening page`() {
+        val h = PageHistory()
+        h.reset(39) // 上次停在第 40 页
+        h.moveTo(40) // 翻到第 41 页
+        assertEquals(listOf(40), h.recentPages())
+        h.moveTo(41)
+        assertEquals(listOf(41), h.recentPages())
+    }
+
+    @Test
+    fun `a jump keeps both the page we left and the page we landed on`() {
+        val h = PageHistory()
+        h.reset(39) // 上次停在第 40 页
+        for (p in 40..44) h.moveTo(p) // 一路读到第 45 页
+        h.jump(44, 49) // 跳到第 50 页
+        assertEquals(listOf(49, 44), h.recentPages())
+        assertEquals(44, h.back(49))
+    }
+
+    @Test
+    fun `moving onto a page already in the recent list does not duplicate it`() {
+        val h = PageHistory()
+        h.reset(0)
+        h.jump(0, 10)
+        h.moveTo(0) // 读回第 1 页
+        assertEquals(listOf(0), h.recentPages())
     }
 }

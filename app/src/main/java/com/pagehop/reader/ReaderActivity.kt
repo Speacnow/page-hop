@@ -445,11 +445,13 @@ class ReaderActivity : AppCompatActivity() {
     private fun scrollToPage(page: Int, from: Int = -1) {
         val p = page.coerceIn(0, doc.pageCount - 1)
         if (p == currentPage && from < 0) return
-        if (p != currentPage) {
-            (b.pageList.layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(p, 0)
-            setPage(p)
-            b.tvPage.text = "${p + 1}"
-            schedulePersist()
+        asJump {
+            if (p != currentPage) {
+                (b.pageList.layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(p, 0)
+                setPage(p)
+                b.tvPage.text = "${p + 1}"
+                schedulePersist()
+            }
         }
         // 松手才算一次主动跳转：拖动过程中 from < 0，不记账
         if (from >= 0) armJumpCommit(from, p)
@@ -2351,7 +2353,7 @@ class ReaderActivity : AppCompatActivity() {
         val p = page.coerceIn(0, doc.pageCount - 1)
         if (p == currentPage) return
         val from = currentPage
-        goToPage(p)
+        asJump { goToPage(p) }
         armJumpCommit(from, p)
         if (banner) showJumpBanner(p, from)
     }
@@ -2396,6 +2398,19 @@ class ReaderActivity : AppCompatActivity() {
 
     private var pendingJump: Runnable? = null
 
+    /** 正在跳转：这一步换页是"跳"过去的，历史锚点要留在起跳页，别跟着目标页跑 */
+    private var jumping = false
+
+    private inline fun <T> asJump(block: () -> T): T {
+        val prev = jumping
+        jumping = true
+        try {
+            return block()
+        } finally {
+            jumping = prev
+        }
+    }
+
     /** 所有"换页"都走这里；历史只在 [jumpTo] 停满 1 秒后由 [armJumpCommit] 写入 */
     private fun setPage(newPage: Int) {
         val p = newPage.coerceIn(0, doc.pageCount - 1)
@@ -2403,6 +2418,10 @@ class ReaderActivity : AppCompatActivity() {
         // 还没停满 1 秒就换页：这次主动跳转作废
         cancelPendingJump()
         currentPage = p
+        // 逐页读到这里：记录点跟着走（但不新增条目），否则"打开书停在哪页"会一直赖在
+        // 历史里，真正跳转时的来源页也会被记成打开页。跳转目标页、拖进度条途中的
+        // 中间页不算"读到这里"，锚点要留在起跳页。
+        if (!jumping && !draggingSeek) history.moveTo(p)
         updateIndicator()
     }
 
