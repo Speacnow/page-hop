@@ -38,13 +38,39 @@
             android:layout_height="match_parent"
             android:background="#4D000000" />
 
-        <ImageView
-            android:id="@+id/previewImage"
+        <!-- 竖屏：一整页铺满屏宽；横屏：同一页竖着切成上下两半，上半摆左边、
+             下半摆右边 —— 每一半都占满半个屏幕，等于把字放大一倍 -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:alpha="0.32"
-            android:contentDescription="@string/thumbs"
-            android:scaleType="fitCenter" />
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/previewImage"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:alpha="0.32"
+                android:contentDescription="@string/thumbs"
+                android:scaleType="fitCenter" />
+
+            <View
+                android:id="@+id/previewDivider"
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="#33FFFFFF"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/previewImageBottom"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:alpha="0.32"
+                android:contentDescription="@string/thumbs"
+                android:scaleType="fitCenter"
+                android:visibility="gone" />
+        </LinearLayout>
     </FrameLayout>
 
     <!-- 底栏：进度条 + 当前页 + 列数 -->

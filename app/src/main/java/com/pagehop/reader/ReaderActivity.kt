@@ -1979,7 +1979,8 @@ class ReaderActivity : AppCompatActivity() {
         // 面板的顶/底栏也跟随"界面配色"（否则换配色后这里还是深青）
         val barFg = UiPrefs.barContent
         val barFaint = (barFg and 0x00FFFFFF) or 0xAA000000.toInt()
-        v.findViewById<View>(R.id.thumbBottom).setBackgroundColor(UiPrefs.barColor)
+        val bottomBar = v.findViewById<View>(R.id.thumbBottom)
+        bottomBar.setBackgroundColor(UiPrefs.barColor)
         (btnClose as? android.widget.ImageButton)?.setColorFilter(barFg)
         v.findViewById<TextView>(R.id.tvMapPage).setTextColor(barFg)
         v.findViewById<TextView>(R.id.tvDensity).setTextColor(barFaint)
@@ -2182,6 +2183,8 @@ class ReaderActivity : AppCompatActivity() {
         // ---------------- 长按预览 ----------------
         val previewLayer = v.findViewById<View>(R.id.previewLayer)
         val previewImage = v.findViewById<ImageView>(R.id.previewImage)
+        val previewBottom = v.findViewById<ImageView>(R.id.previewImageBottom)
+        val previewDivider = v.findViewById<View>(R.id.previewDivider)
         // 棋盘格线画在网格内部：会跟着网格一起被模糊，半透明大图盖在它上面
         val gridLines = GridLinesDecoration(resources.displayMetrics.density)
         grid.addItemDecoration(gridLines)
@@ -2208,15 +2211,35 @@ class ReaderActivity : AppCompatActivity() {
             hovered = page
             previewLayer.visibility = View.VISIBLE
             // 预览大图要和正文同一个颜色模式（夜间/棕褐…），否则出来一张白纸很跳
-            previewImage.setColorFilter(ColorModes.filter(state.colorMode))
+            val filter = ColorModes.filter(state.colorMode)
+            previewImage.setColorFilter(filter)
+            previewBottom.setColorFilter(filter)
             previewImage.alpha = UiPrefs.previewAlpha
+            previewBottom.alpha = UiPrefs.previewAlpha
+            // 横屏时整页缩在屏幕中间一小条，字根本看不清：竖着切成上下两半铺满左右，
+            // 等于把字号放大一倍（和长按箭头那个面板的做法一致）
+            val dm = resources.displayMetrics
+            val split = dm.widthPixels > dm.heightPixels
+            previewBottom.visibility = if (split) View.VISIBLE else View.GONE
+            previewDivider.visibility = if (split) View.VISIBLE else View.GONE
+            // 底栏画在预览层上面：给它让出位置，别把整页的下沿（横屏时是右半边）压掉
+            val barH = bottomBar.height.takeIf { it > 0 }
+                ?: (46 * dm.density).toInt()
+            previewLayer.setPadding(0, 0, 0, barH)
             previewJob?.cancel()
             // 指到哪页就渲染哪页的大图（按屏宽 90% 渲染，比格子里的缩略图清楚得多）
             previewJob = lifecycleScope.launch {
-                val w = resources.displayMetrics.widthPixels
+                // 横屏每一半只占半屏宽，按半屏宽渲染就够 1:1 清晰
+                val w = if (split) (dm.widthPixels / 2).coerceAtLeast(320) else dm.widthPixels
                 val bmp = RenderEngine.thumb(doc, docId, page, w)
                 if (bmp != null && hovered == page) {
-                    previewImage.setImageBitmap(bmp)
+                    if (split) {
+                        val (top, bottom) = pageHalves(bmp)
+                        previewImage.setImageBitmap(top)
+                        previewBottom.setImageBitmap(bottom)
+                    } else {
+                        previewImage.setImageBitmap(bmp)
+                    }
                     tvMapPage.text = "${page + 1} / $n"
                 }
             }
@@ -2226,6 +2249,7 @@ class ReaderActivity : AppCompatActivity() {
             val last = hovered
             previewJob?.cancel()
             previewImage.setImageDrawable(null)
+            previewBottom.setImageDrawable(null)
             previewLayer.visibility = View.GONE
             gridLines.active = false
             thumbAdapter.hideNumbers = false
@@ -2471,6 +2495,17 @@ class ReaderActivity : AppCompatActivity() {
     }
 
     /**
+     * 横屏放大预览：把整页竖着切成上下两半，上半摆左边、下半摆右边。
+     * 每一半都能占满半个屏幕宽，等于把字号放大一倍。
+     */
+    private fun pageHalves(bmp: Bitmap): Pair<Bitmap, Bitmap> {
+        if (bmp.height <= 8) return bmp to bmp
+        val half = bmp.height / 2
+        return Bitmap.createBitmap(bmp, 0, 0, bmp.width, half) to
+            Bitmap.createBitmap(bmp, 0, half, bmp.width, bmp.height - half)
+    }
+
+    /**
      * 长按左 / 右箭头：最近主动跳过的 6 页用缩略图摆 2×3，尽量大，点一张直接跳。
      *
      * 长按其中某一格 = 把那一页放大到整屏（压暗背景、不透明），看得清了松手就恢复。
@@ -2492,22 +2527,28 @@ class ReaderActivity : AppCompatActivity() {
             pages.size == 1 -> 1
             else -> 2
         }
-        val cellW = (dm.widthPixels - (10 * density).toInt()) / cols
         val rowsWanted = (pages.size + cols - 1) / cols
+        // 面板只在两条工具栏之间那块地方里居中。以前按整屏算尺寸：
+        // 横屏时上下的粉色工具栏会被压住，左右也没有对称留白。
+        val topInset = if (::b.isInitialized && b.topBar.isShown) b.topBar.height else 0
+        val botInset = if (::b.isInitialized && b.bottomBar.isShown) b.bottomBar.height else 0
+        val edge = (16 * density).toInt()
+        val pad = (6 * density).toInt()
+        val availW = (dm.widthPixels - 2 * edge).coerceAtLeast(200)
+        val availH = (dm.heightPixels - topInset - botInset - 2 * edge).coerceAtLeast(200)
+        val cellW0 = ((availW - 2 * pad) / cols).coerceAtLeast(80)
         val cellH = minOf(
-            (cellW * 1.36f).toInt(),
-            // 横屏只有一行，可以放到屏高的 0.78；竖屏三行，留 0.62
-            (dm.heightPixels * (if (landscape) 0.78f else 0.62f) / rowsWanted).toInt(),
+            (cellW0 * 1.36f).toInt(),
+            ((availH - 2 * pad) / rowsWanted).coerceAtLeast(80),
         )
-
+        // 高被"可用高度"咬住时把宽度也收回来，保持一页纸的比例：
+        // 否则横屏一行只有两格，格子会又矮又胖，页缩在中间一条、两边全空
+        val cellW = minOf(cellW0, (cellH / 1.36f).toInt().coerceAtLeast(80))
         val grid = ZoomGrid(this).apply {
             layoutManager = GridLayoutManager(this@ReaderActivity, cols)
             overScrollMode = View.OVER_SCROLL_NEVER
             clipToPadding = false
-            setPadding(
-                (5 * density).toInt(), (2 * density).toInt(),
-                (5 * density).toInt(), (2 * density).toInt(),
-            )
+            setPadding(pad, pad, pad, pad)
             // 面板背景从"对话框窗口"挪到网格自己身上：窗口现在是整屏透明的，
             // 只装一个居中的面板，长按放大时才有一整屏可用。
             background = getDrawable(R.drawable.bg_dialog_panel)
@@ -2613,10 +2654,10 @@ class ReaderActivity : AppCompatActivity() {
                 val targetW = if (landscape) (dm.widthPixels / 2).coerceAtLeast(320) else dm.widthPixels
                 val bmp = RenderEngine.thumb(doc, docId, page, targetW)
                 if (bmp == null || hovered != page) return@launch
-                if (landscape && bmp.height > 8) {
-                    val half = bmp.height / 2
-                    leftImg.setImageBitmap(Bitmap.createBitmap(bmp, 0, 0, bmp.width, half))
-                    rightImg.setImageBitmap(Bitmap.createBitmap(bmp, 0, half, bmp.width, bmp.height - half))
+                if (landscape) {
+                    val (top, bottom) = pageHalves(bmp)
+                    leftImg.setImageBitmap(top)
+                    rightImg.setImageBitmap(bottom)
                 } else {
                     leftImg.setImageBitmap(bmp)
                 }
@@ -2681,12 +2722,16 @@ class ReaderActivity : AppCompatActivity() {
         }
 
         val container = FrameLayout(this)
-        // 高度写死成"行数 × 格高"：交给 wrap_content 时，RecyclerView 在奇数条
-        // （例如 5 条 = 2 列 3 行）会少算一行，第 5 张图就露在面板圆角外面。
-        val gridHeight = rowsWanted * cellH + (4 * density).toInt()
+        // 宽高都写死成"列数 × 格宽 / 行数 × 格高"：交给 wrap_content 时，RecyclerView 在
+        // 奇数条（例如 5 条 = 2 列 3 行）会少算一行，第 5 张图就露在面板圆角外面。
+        val gridW = cols * cellW + 2 * pad
+        val gridH = rowsWanted * cellH + 2 * pad
+        val contentH = dm.heightPixels - topInset - botInset
         container.addView(
             grid,
-            FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, gridHeight, Gravity.CENTER),
+            FrameLayout.LayoutParams(gridW, gridH, Gravity.TOP or Gravity.CENTER_HORIZONTAL).apply {
+                topMargin = topInset + ((contentH - gridH) / 2).coerceAtLeast(0)
+            },
         )
         container.addView(
             overlay,
@@ -2704,6 +2749,14 @@ class ReaderActivity : AppCompatActivity() {
             // 于是"在窗口里居中"看起来就是偏下。窗口本身没法越过系统栏，所以
             // 这里先让它铺满可用区域，show() 之后再按真正的位置补偿（见下方 post）。
             w.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+            // 横屏时挖孔在左边缘，不声明这个模式，整个窗口会被往里挤 100 多 px——
+            // 面板就成了"左边一条缝、右边贴边"（用户截图里正是这样）
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                w.attributes = w.attributes.apply {
+                    layoutInDisplayCutoutMode =
+                        WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+                }
+            }
             WindowCompat.setDecorFitsSystemWindows(w, false)
             w.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         }
