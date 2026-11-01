@@ -17,6 +17,9 @@ object UiPrefs {
     private const val K_SPANS = "thumb_spans"
     private const val K_VOLUME = "volume_keys"
     private const val K_VOLUME_OVERLAP = "volume_overlap"
+    private const val K_CORNER_BTN = "corner_button"
+    private const val K_TAP_PAGING = "tap_paging"
+    private const val K_TAP_HORIZ = "tap_paging_horizontal"
     private const val K_ROTATE_AUTO = "rotate_auto"
     private const val K_ROTATE_LAND = "rotate_lock_landscape"
 
@@ -43,6 +46,24 @@ object UiPrefs {
      * 默认 10%：上一屏最后两三行留在下一屏顶上，接得上、又不会白读太多。
      */
     var volumeOverlap: Int = 10
+        private set
+
+    /**
+     * 批注模式下左下角的翻页按钮（短按往后、长按/双击往前）。
+     * 只在"笔"或"文字批注"开着时出现，所以默认开也不会碍事。
+     */
+    var cornerButton: Boolean = true
+        private set
+
+    /**
+     * 非批注模式下点屏幕翻页：屏幕中间一半还是"开关工具栏"，
+     * 两侧/上下四分之一是翻页。
+     */
+    var tapPaging: Boolean = false
+        private set
+
+    /** 触摸翻页方向：true = 左右（左往前、右往后），false = 上下（上往前、下往后） */
+    var tapPagingHorizontal: Boolean = false
         private set
 
     /** 长按预览大图的透明度：越小越透（0 = 全透明，1 = 不透明） */
@@ -100,6 +121,9 @@ object UiPrefs {
         thumbSpans = p.getInt(K_SPANS, 4)
         volumeKeys = p.getBoolean(K_VOLUME, false)
         volumeOverlap = p.getInt(K_VOLUME_OVERLAP, 10).coerceIn(0, 40)
+        cornerButton = p.getBoolean(K_CORNER_BTN, true)
+        tapPaging = p.getBoolean(K_TAP_PAGING, false)
+        tapPagingHorizontal = p.getBoolean(K_TAP_HORIZ, false)
         rotateAuto = p.getBoolean(K_ROTATE_AUTO, false)
         rotateLockLandscape = p.getBoolean(K_ROTATE_LAND, false)
         gridLines = p.getBoolean(K_GRID, true)
@@ -140,6 +164,21 @@ object UiPrefs {
     fun setVolumeOverlap(ctx: Context, percent: Int) {
         volumeOverlap = percent.coerceIn(0, 40)
         edit(ctx).putInt(K_VOLUME_OVERLAP, volumeOverlap).apply()
+    }
+
+    fun setCornerButton(ctx: Context, on: Boolean) {
+        cornerButton = on
+        edit(ctx).putBoolean(K_CORNER_BTN, on).apply()
+    }
+
+    fun setTapPaging(ctx: Context, on: Boolean) {
+        tapPaging = on
+        edit(ctx).putBoolean(K_TAP_PAGING, on).apply()
+    }
+
+    fun setTapPagingHorizontal(ctx: Context, horizontal: Boolean) {
+        tapPagingHorizontal = horizontal
+        edit(ctx).putBoolean(K_TAP_HORIZ, horizontal).apply()
     }
 
     /** 切换旋转模式：auto=true 跟随重力；auto=false 锁死在 lockLandscape 指定的方向 */

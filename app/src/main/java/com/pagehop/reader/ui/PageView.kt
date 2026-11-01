@@ -71,8 +71,11 @@ class PageView @JvmOverloads constructor(
     /** 这一页上的文字批注 */
     var textNotes: List<TextNote> = emptyList()
 
-    /** 文字批注模式下的单击：给 Activity 一个落点（页面比例坐标） */
-    var onTapAt: ((Int, Float, Float) -> Unit)? = null
+    /**
+     * 单击：给 Activity 落点（页面比例坐标）+ 屏幕坐标。
+     * 屏幕坐标用来判断"点在哪块区域"——中间开关工具栏，边缘翻页。
+     */
+    var onTapAt: ((Int, Float, Float, Float, Float) -> Unit)? = null
 
     /** 文字批注模式下点到已有批注：交给 Activity 编辑/删除 */
     var onTextNoteClicked: ((TextNote) -> Unit)? = null
@@ -145,6 +148,10 @@ class PageView @JvmOverloads constructor(
 
     private var downX = 0f
     private var downY = 0f
+
+    /** 按下点在整个屏幕上的坐标（不受缩放变换影响，用来分区翻页） */
+    private var downRawX = 0f
+    private var downRawY = 0f
 
     // 手写中的原始点（控件坐标）
     private val rawPoints = ArrayList<Float>(256)
@@ -454,6 +461,8 @@ class PageView @JvmOverloads constructor(
             MotionEvent.ACTION_DOWN -> {
                 downX = e.x
                 downY = e.y
+                downRawX = e.rawX
+                downRawY = e.rawY
                 return true
             }
 
@@ -471,18 +480,18 @@ class PageView @JvmOverloads constructor(
         return super.onTouchEvent(e)
     }
 
-    /** 单击：交给 Activity 切换工具栏；文字批注模式下改成"在这落一条批注" */
+    /** 单击：交给 Activity 决定是切工具栏、落批注还是按区域翻页 */
     override fun performClick(): Boolean {
         super.performClick()
+        val hit = textNoteAt(downX, downY)
+        if (hit != null) {
+            onTextNoteClicked?.invoke(hit)
+            return true
+        }
         val at = onTapAt
         if (at != null) {
-            val hit = textNoteAt(downX, downY)
-            if (hit != null) {
-                onTextNoteClicked?.invoke(hit)
-            } else {
-                val p = viewToFraction(downX, downY)
-                at(pageIndex, p.x, p.y)
-            }
+            val p = viewToFraction(downX, downY)
+            at(pageIndex, p.x, p.y, downRawX, downRawY)
         } else {
             onTap?.invoke(pageIndex)
         }

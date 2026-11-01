@@ -44,6 +44,7 @@ class SettingsActivity : AppCompatActivity() {
         setupAlpha()
         setupGridSwitch()
         setupVolumeSwitch()
+        setupExtraSwitches()
         b.gridColorRow.addView(
             dotRow(UiPrefs.lineColors.map { it.second }, UiPrefs.gridColor) { picked ->
                 UiPrefs.setGridColor(this, picked)
@@ -104,6 +105,9 @@ class SettingsActivity : AppCompatActivity() {
         b.tvAlpha.setTextColor(0xFFFFFFFF.toInt())
         b.swGrid.setTextColor(0xFFFFFFFF.toInt())
         b.swVolume.setTextColor(0xFFFFFFFF.toInt())
+        b.swCorner.setTextColor(0xFFFFFFFF.toInt())
+        b.swTapPaging.setTextColor(0xFFFFFFFF.toInt())
+        b.swTapHorizontal.setTextColor(0xFFFFFFFF.toInt())
     }
 
     private fun setupAlpha() {
@@ -165,6 +169,41 @@ class SettingsActivity : AppCompatActivity() {
             override fun onStartTrackingTouch(s: SeekBar?) {}
             override fun onStopTrackingTouch(s: SeekBar?) {}
         })
+    }
+
+    /** 批注时的左下角翻页按钮 + 非批注模式的触摸翻页 */
+    private fun setupExtraSwitches() {
+        val thumbs = ColorStateList(
+            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
+            intArrayOf(0xFF7FE3F5.toInt(), 0xFF9E9E9E.toInt()),
+        )
+        val tracks = ColorStateList(
+            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
+            intArrayOf(0x66005E78, 0x339E9E9E),
+        )
+        for (sw in arrayOf(b.swCorner, b.swTapPaging, b.swTapHorizontal)) {
+            sw.thumbTintList = thumbs
+            sw.trackTintList = tracks
+        }
+
+        b.swCorner.isChecked = UiPrefs.cornerButton
+        b.swCorner.setOnCheckedChangeListener { _, on -> UiPrefs.setCornerButton(this, on) }
+
+        b.swTapPaging.isChecked = UiPrefs.tapPaging
+        b.swTapHorizontal.isChecked = UiPrefs.tapPagingHorizontal
+        b.swTapPaging.setOnCheckedChangeListener { _, on ->
+            UiPrefs.setTapPaging(this, on)
+            // 方向只在开了触摸翻页时才有意义
+            val visible = if (on) View.VISIBLE else View.GONE
+            b.swTapHorizontal.visibility = visible
+            b.tvTapHorizontalHint.visibility = visible
+        }
+        val visible = if (UiPrefs.tapPaging) View.VISIBLE else View.GONE
+        b.swTapHorizontal.visibility = visible
+        b.tvTapHorizontalHint.visibility = visible
+        b.swTapHorizontal.setOnCheckedChangeListener { _, horizontal ->
+            UiPrefs.setTapPagingHorizontal(this, horizontal)
+        }
     }
 
     /**

@@ -228,6 +228,7 @@ class ReaderActivity : AppCompatActivity() {
 
         setupList()
         setupProgressBar()
+        setupCornerButton()
         applyColorMode()
         updateIndicator()
         // 应用级外观：顶栏/底栏配色
@@ -238,6 +239,7 @@ class ReaderActivity : AppCompatActivity() {
             if (b.topBar.height > 0) topBarH = b.topBar.height
             if (b.bottomBar.height > 0) bottomBarH = b.bottomBar.height
             applyPagePadding()
+            updateCornerButton()
         }
 
         // 停手后按当前缩放倍率重画可见页：放大 2 倍仍按 1x 渲染会糊成一片
@@ -329,8 +331,16 @@ class ReaderActivity : AppCompatActivity() {
             screenWidth = { resources.displayMetrics.widthPixels },
             aspects = { aspects },
             onTapPage = { toggleBars() },
-            onTapAt = { page, fx, fy ->
-                if (textMode) showTextNoteDialog(page, fx, fy) else toggleBars()
+            onTapAt = { page, fx, fy, rx, ry ->
+                when {
+                    // 文字批注：点哪儿就在哪儿落一条
+                    textMode -> showTextNoteDialog(page, fx, fy)
+                    // 批注模式：写字优先，单击只负责收起 / 调出工具栏
+                    penMode -> toggleBars()
+                    // 非批注 + 开了触摸翻页：中间一半开关工具栏，两侧翻页
+                    UiPrefs.tapPaging -> handleZoneTap(rx, ry)
+                    else -> toggleBars()
+                }
             },
             onTextNoteClicked = { note ->
                 if (textMode) {
@@ -522,6 +532,12 @@ class ReaderActivity : AppCompatActivity() {
     private var pageRows: PageRowAdapter? = null
     private var historyDialog: android.app.Dialog? = null
 
+    /** 翻页分界提示线（叠在正文上，翻完自动淡出） */
+    private var flipHint: View? = null
+
+    /** 批注模式下左下角的翻页按钮 */
+    private var cornerBtn: android.widget.ImageButton? = null
+
     private var topBarH = 0
     private var bottomBarH = 0
 
@@ -548,6 +564,7 @@ class ReaderActivity : AppCompatActivity() {
             }
         }
         applyPagePadding()
+        updateCornerButton()
     }
 
     /**
@@ -718,7 +735,10 @@ class ReaderActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         UiPrefs.load(this)
-        if (::b.isInitialized) applyBarTheme()
+        if (::b.isInitialized) {
+            applyBarTheme()
+            updateCornerButton()
+        }
     }
 
     override fun onDestroy() {
@@ -1534,12 +1554,14 @@ class ReaderActivity : AppCompatActivity() {
         updatePenButtonStyle()
         adapter.notifyItemRangeChanged(0, doc.pageCount.coerceAtMost(3))
         setBarsVisible(true)
+        updateCornerButton()
         Toast.makeText(this, "文字批注：点页面任意位置打字", Toast.LENGTH_SHORT).show()
     }
 
     private fun exitTextMode() {
         textMode = false
         updatePenButtonStyle()
+        updateCornerButton()
     }
 
     /** 在页面上点一下：弹输入框，写完存成一条 TextNote */
@@ -1687,6 +1709,7 @@ class ReaderActivity : AppCompatActivity() {
         applyPenMode()
         updatePenButtonStyle()
         setBarsVisible(false)
+        updateCornerButton()
         // 工具栏一收就把手势规则说清楚：批注模式单指是笔，翻页得用双指，
         // 不然"写完想往下翻，页面纹丝不动"会以为卡住了。
         Toast.makeText(
@@ -1703,6 +1726,7 @@ class ReaderActivity : AppCompatActivity() {
         applyPenMode()
         updatePenButtonStyle()
         setBarsVisible(true)
+        updateCornerButton()
     }
 
     /** 批注模式开启时，把顶栏那个「批注」图标点亮，一眼能看出当前在写字 */
@@ -2395,7 +2419,7 @@ class ReaderActivity : AppCompatActivity() {
      *
      * 放大过之后，能看到的列表高度只有 1/scale，按这个算才不会一次滚过头。
      */
-    private fun scrollByViewport(forward: Boolean) {
+    private fun scrollByViewport(forward: Boolean, showHint: Boolean = false) {
         if (!::adapter.isInitialized) return
         val view = b.pageList
         val screen = b.zoomFrame.scale.coerceAtLeast(1f)
@@ -2409,7 +2433,126 @@ class ReaderActivity : AppCompatActivity() {
         val dy = (visible * (1f - overlap)).toInt().coerceAtLeast(1)
         // 直接跳到位，不要 smoothScrollBy 那段动画：翻屏是"换一批内容"，滑过去反而晃眼
         view.scrollBy(0, if (forward) dy else -dy)
+        if (showHint) showFlipHint(forward, dy, content)
         schedulePersist()
+    }
+
+    /**
+     * 翻页分界提示线：在"翻页前那一屏的边缘"画一条横线，新内容从哪儿开始一眼可见。
+     *
+     * 往上翻时，之前看过的内容底部在新画面里落在 `正文顶 + (可见高度 - dy)`；
+     * 往下翻时（退回上一屏），之前那一屏的顶部落在 `正文顶 + dy`。
+     */
+    private fun showFlipHint(forward: Boolean, dy: Int, content: Int) {
+        val line = flipHint ?: View(this).apply {
+            setBackgroundColor(0xE6FF5252.toInt())
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                (2 * resources.displayMetrics.density).toInt().coerceAtLeast(2),
+                Gravity.TOP,
+            )
+            visibility = View.GONE
+            b.root.addView(this)
+            flipHint = this
+        }
+        val top = b.pageList.paddingTop
+        val y = if (forward) top + (content - dy) else top + dy
+        line.animate().cancel()
+        line.translationY = y.toFloat()
+        line.alpha = 1f
+        line.visibility = View.VISIBLE
+        line.animate().alpha(0f).setStartDelay(1100).setDuration(450)
+            .withEndAction { line.visibility = View.GONE }
+            .start()
+    }
+
+    /**
+     * 非批注模式下点屏幕：中间一半还是"开关工具栏"，剩下两半用来翻页。
+     *
+     * 上下模式：上 1/4 往前、下 1/4 往后；
+     * 左右模式：左 1/4 往前、右 1/4 往后。
+     * 坐标是按下点的屏幕坐标（rawX / rawY），所以页面缩放也能算对。
+     */
+    private fun handleZoneTap(x: Float, y: Float) {
+        val dm = resources.displayMetrics
+        if (UiPrefs.tapPagingHorizontal) {
+            when {
+                x < dm.widthPixels * 0.25f -> scrollByViewport(forward = false)
+                x > dm.widthPixels * 0.75f -> scrollByViewport(forward = true)
+                else -> toggleBars()
+            }
+        } else {
+            when {
+                y < dm.heightPixels * 0.25f -> scrollByViewport(forward = false)
+                y > dm.heightPixels * 0.75f -> scrollByViewport(forward = true)
+                else -> toggleBars()
+            }
+        }
+    }
+
+    // ---------------- 左下角翻页按钮 ----------------
+
+    /**
+     * 批注模式下左下角的翻页按钮：短按往后一屏，长按 / 双击往前一屏。
+     *
+     * 工具栏收起来时贴屏幕最左下角，展开时让到底栏上方 —— 批注时工具栏一收，
+     * 手指够到左上角很难，翻页按钮就在手边。
+     */
+    private fun setupCornerButton() {
+        val size = (56 * resources.displayMetrics.density).toInt()
+        val btn = android.widget.ImageButton(this).apply {
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(0x99000000.toInt())
+            }
+            setImageResource(R.drawable.ic_chevron_right)
+            setColorFilter(0xFFFFFFFF.toInt())
+            // 圆按钮 + 朝下的箭头：旋转 90° 复用现成的图标
+            rotation = 90f
+            scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
+            setPadding(size / 4, size / 4, size / 4, size / 4)
+            contentDescription = "翻页"
+            visibility = View.GONE
+
+            val gd = android.view.GestureDetector(this@ReaderActivity, object : android.view.GestureDetector.SimpleOnGestureListener() {
+                override fun onDown(e: MotionEvent) = true
+
+                override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+                    scrollByViewport(forward = true)
+                    return true
+                }
+
+                override fun onDoubleTap(e: MotionEvent): Boolean {
+                    scrollByViewport(forward = false)
+                    return true
+                }
+
+                override fun onLongPress(e: MotionEvent) {
+                    scrollByViewport(forward = false)
+                }
+            })
+            setOnTouchListener { _, e ->
+                gd.onTouchEvent(e)
+                true
+            }
+        }
+        b.root.addView(btn, FrameLayout.LayoutParams(size, size, Gravity.BOTTOM or Gravity.START))
+        cornerBtn = btn
+        updateCornerButton()
+    }
+
+    /** 按钮只在"批注开着 + 设置里允许"时出现；位置跟着工具栏走 */
+    private fun updateCornerButton() {
+        val btn = cornerBtn ?: return
+        val show = UiPrefs.cornerButton && (penMode || textMode)
+        btn.visibility = if (show) View.VISIBLE else View.GONE
+        if (!show) return
+        val lp = (btn.layoutParams as? FrameLayout.LayoutParams) ?: return
+        val barH = if (barsVisible) maxOf(bottomBarH, b.bottomBar.height) else 0
+        lp.leftMargin = (10 * resources.displayMetrics.density).toInt()
+        lp.bottomMargin = barH + (12 * resources.displayMetrics.density).toInt()
+        lp.gravity = Gravity.BOTTOM or Gravity.START
+        btn.layoutParams = lp
     }
 
     /**
@@ -2422,11 +2565,11 @@ class ReaderActivity : AppCompatActivity() {
         ) {
             when (keyCode) {
                 KeyEvent.KEYCODE_VOLUME_UP -> {
-                    scrollByViewport(forward = false)
+                    scrollByViewport(forward = false, showHint = true)
                     return true
                 }
                 KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                    scrollByViewport(forward = true)
+                    scrollByViewport(forward = true, showHint = true)
                     return true
                 }
             }

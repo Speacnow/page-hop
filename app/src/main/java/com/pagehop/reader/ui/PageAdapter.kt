@@ -30,8 +30,8 @@ class PageAdapter(
     private val screenWidth: () -> Int,
     private val aspects: () -> FloatArray,
     private val onTapPage: () -> Unit,
-    /** 文字批注模式下的落点回调；为 null 时单击仍是"切换工具栏" */
-    private val onTapAt: ((Int, Float, Float) -> Unit)? = null,
+    /** 单击回调：page、页面比例坐标（落批注用）、屏幕坐标（分区翻页用） */
+    private val onTapAt: ((Int, Float, Float, Float, Float) -> Unit)? = null,
     /** 点到已有文字批注（编辑/删除） */
     private val onTextNoteClicked: ((TextNote) -> Unit)? = null,
     private val onDoubleTapPage: () -> Unit,

@@ -145,6 +145,65 @@
                     android:textSize="11sp" />
             </LinearLayout>
 
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/swCorner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:text="批注时显示左下角翻页按钮"
+                android:textColor="#FFFFFFFF"
+                android:textSize="15sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="批注状态下才出现：短按往后一屏，长按或双击往前一屏。工具栏收起时贴屏幕左下角，展开时自动让到底栏上方"
+                android:textColor="#99FFFFFF"
+                android:textSize="11sp" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/swTapPaging"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:text="触摸翻页（非批注模式）"
+                android:textColor="#FFFFFFFF"
+                android:textSize="15sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="点屏幕中间一半：照旧开关工具栏；点剩下的两侧：翻一屏。批注模式下不生效（那时写字优先）"
+                android:textColor="#99FFFFFF"
+                android:textSize="11sp" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/swTapHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_marginTop="6dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:text="左右翻页（关 = 上下翻页）"
+                android:textColor="#FFFFFFFF"
+                android:textSize="15sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvTapHorizontalHint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:text="开：点左边往前、点右边往后；关：点上边往前、点下边往后"
+                android:textColor="#99FFFFFF"
+                android:textSize="11sp"
+                android:visibility="gone" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
