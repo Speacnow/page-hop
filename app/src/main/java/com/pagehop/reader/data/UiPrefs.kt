@@ -21,6 +21,10 @@ object UiPrefs {
     private const val K_TAP_PAGING = "tap_paging"
     private const val K_TAP_HORIZ = "tap_paging_horizontal"
     private const val K_FLIP_HINT = "flip_hint"
+    private const val K_HINT_INSET = "flip_hint_inset"
+    private const val K_HINT_ALPHA = "flip_hint_alpha"
+    private const val K_HINT_WIDTH = "flip_hint_width"
+    private const val K_HINT_COLOR = "flip_hint_color"
     private const val K_ROTATE_AUTO = "rotate_auto"
     private const val K_ROTATE_LAND = "rotate_lock_landscape"
 
@@ -71,6 +75,22 @@ object UiPrefs {
     var flipHint: Boolean = true
         private set
 
+    /** 提示线左右各留多少白（屏幕宽度的百分比，默认 2%） */
+    var flipHintInset: Int = 2
+        private set
+
+    /** 提示线的不透明度（百分比，100 = 不透明） */
+    var flipHintAlpha: Int = 100
+        private set
+
+    /** 提示线粗细（dp） */
+    var flipHintWidth: Int = 3
+        private set
+
+    /** 提示线颜色 */
+    var flipHintColor: Int = 0xFFFF3B30.toInt()
+        private set
+
     /** 长按预览大图的透明度：越小越透（0 = 全透明，1 = 不透明） */
     var previewAlpha: Float = 0.32f
         private set
@@ -110,6 +130,18 @@ object UiPrefs {
         "灰色" to 0xFF546E7A.toInt(),
     )
 
+    /** 翻页提示线颜色候选 */
+    val hintColors: List<Pair<String, Int>> = listOf(
+        "红" to 0xFFFF3B30.toInt(),
+        "橙" to 0xFFFF9500.toInt(),
+        "黄" to 0xFFFFD60A.toInt(),
+        "绿" to 0xFF34C759.toInt(),
+        "蓝" to 0xFF0A84FF.toInt(),
+        "紫" to 0xFFBF5AF2.toInt(),
+        "黑" to 0xFF1C1C1E.toInt(),
+        "白" to 0xFFFFFFFF.toInt(),
+    )
+
     /** 棋盘格线颜色候选 */
     val lineColors: List<Pair<String, Int>> = listOf(
         "红" to 0xFFE53935.toInt(),
@@ -130,6 +162,10 @@ object UiPrefs {
         tapPaging = p.getBoolean(K_TAP_PAGING, false)
         tapPagingHorizontal = p.getBoolean(K_TAP_HORIZ, false)
         flipHint = p.getBoolean(K_FLIP_HINT, true)
+        flipHintInset = p.getInt(K_HINT_INSET, 2).coerceIn(0, 20)
+        flipHintAlpha = p.getInt(K_HINT_ALPHA, 100).coerceIn(10, 100)
+        flipHintWidth = p.getInt(K_HINT_WIDTH, 3).coerceIn(1, 12)
+        flipHintColor = p.getInt(K_HINT_COLOR, 0xFFFF3B30.toInt())
         rotateAuto = p.getBoolean(K_ROTATE_AUTO, false)
         rotateLockLandscape = p.getBoolean(K_ROTATE_LAND, false)
         gridLines = p.getBoolean(K_GRID, true)
@@ -190,6 +226,26 @@ object UiPrefs {
     fun setFlipHint(ctx: Context, on: Boolean) {
         flipHint = on
         edit(ctx).putBoolean(K_FLIP_HINT, on).apply()
+    }
+
+    fun setFlipHintInset(ctx: Context, percent: Int) {
+        flipHintInset = percent.coerceIn(0, 20)
+        edit(ctx).putInt(K_HINT_INSET, flipHintInset).apply()
+    }
+
+    fun setFlipHintAlpha(ctx: Context, percent: Int) {
+        flipHintAlpha = percent.coerceIn(10, 100)
+        edit(ctx).putInt(K_HINT_ALPHA, flipHintAlpha).apply()
+    }
+
+    fun setFlipHintWidth(ctx: Context, dp: Int) {
+        flipHintWidth = dp.coerceIn(1, 12)
+        edit(ctx).putInt(K_HINT_WIDTH, flipHintWidth).apply()
+    }
+
+    fun setFlipHintColor(ctx: Context, color: Int) {
+        flipHintColor = color
+        edit(ctx).putInt(K_HINT_COLOR, color).apply()
     }
 
     /** 切换旋转模式：auto=true 跟随重力；auto=false 锁死在 lockLandscape 指定的方向 */

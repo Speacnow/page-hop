@@ -2448,25 +2448,31 @@ class ReaderActivity : AppCompatActivity() {
             flipHint?.visibility = View.GONE
             return
         }
-        val d = resources.displayMetrics.density
+        val dm = resources.displayMetrics
+        val d = dm.density
         val line = flipHint ?: View(this).apply {
-            setBackgroundColor(0xFFFF3B30.toInt())
-            // 线上再加一段浅色描边，浅色纸面上也一眼能看到
             elevation = 8 * d
-            layoutParams = FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                (3 * d).toInt().coerceAtLeast(3),
-                Gravity.TOP,
-            )
             visibility = View.GONE
             b.root.addView(this)
             flipHint = this
         }
+        // 样式全部来自设置：留白、粗细、颜色、不透明度
+        val inset = (dm.widthPixels * UiPrefs.flipHintInset / 100f).toInt()
+        line.layoutParams = FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            (UiPrefs.flipHintWidth * d).toInt().coerceAtLeast(2),
+            Gravity.TOP,
+        ).apply {
+            marginStart = inset
+            marginEnd = inset
+        }
+        line.setBackgroundColor(UiPrefs.flipHintColor)
+
         val top = b.pageList.paddingTop
         val y = if (forward) top + (content - dy) else top + dy
         line.animate().cancel()
         line.translationY = y.toFloat()
-        line.alpha = 1f
+        line.alpha = UiPrefs.flipHintAlpha / 100f
         line.visibility = View.VISIBLE
         line.animate().alpha(0f).setStartDelay(2000).setDuration(500)
             .withEndAction { line.visibility = View.GONE }

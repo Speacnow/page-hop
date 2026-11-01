@@ -55,6 +55,7 @@
             android:paddingEnd="20dp"
             android:paddingBottom="40dp">
 
+            <!-- ==================== 阅读预览 ==================== -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -85,16 +86,15 @@
                 android:textColor="#99FFFFFF"
                 android:textSize="11sp" />
 
-            <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/swGrid"
-                android:layout_width="match_parent"
+            <!-- ==================== 翻页 ==================== -->
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
-                android:paddingTop="6dp"
-                android:paddingBottom="6dp"
-                android:text="长按时显示棋盘格线"
-                android:textColor="#FFFFFFFF"
-                android:textSize="15sp" />
+                android:layout_marginTop="30dp"
+                android:text="翻页"
+                android:textColor="#FF7FE3F5"
+                android:textSize="13sp"
+                android:textStyle="bold" />
 
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/swVolume"
@@ -146,42 +146,6 @@
             </LinearLayout>
 
             <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/swFlipHint"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
-                android:paddingTop="6dp"
-                android:paddingBottom="6dp"
-                android:text="翻页分界提示线"
-                android:textColor="#FFFFFFFF"
-                android:textSize="15sp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="每翻完一屏，在上一屏结束的位置闪一条红线，停 2 秒。音量键、点屏幕两侧、右下角按钮翻页都会显示"
-                android:textColor="#99FFFFFF"
-                android:textSize="11sp" />
-
-            <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/swCorner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
-                android:paddingTop="6dp"
-                android:paddingBottom="6dp"
-                android:text="批注时显示右下角翻页按钮"
-                android:textColor="#FFFFFFFF"
-                android:textSize="15sp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="批注状态下才出现：短按往后一屏，长按或双击往前一屏。工具栏收起时贴屏幕右下角，展开时自动让到底栏上方"
-                android:textColor="#99FFFFFF"
-                android:textSize="11sp" />
-
-            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/swTapPaging"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -222,19 +186,141 @@
                 android:textSize="11sp"
                 android:visibility="gone" />
 
-            <TextView
-                android:layout_width="wrap_content"
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/swCorner"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="26dp"
-                android:text="棋盘格线颜色"
-                android:textColor="#FF7FE3F5"
-                android:textSize="13sp"
-                android:textStyle="bold" />
+                android:layout_marginTop="18dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:text="批注时显示右下角翻页按钮"
+                android:textColor="#FFFFFFFF"
+                android:textSize="15sp" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:text="批注状态下才出现：短按往后一屏，长按或双击往前一屏。工具栏收起时贴屏幕右下角，展开时自动让到底栏上方"
+                android:textColor="#99FFFFFF"
+                android:textSize="11sp" />
+
+            <!-- 翻页分界提示线 -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="20dp"
+                android:background="#1FFFFFFF" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/swFlipHint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:text="翻页分界提示线"
+                android:textColor="#FFFFFFFF"
+                android:textSize="15sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="每翻完一屏，在上一屏结束的位置闪一条线，停 2 秒。音量键、点屏幕两侧、右下角按钮翻页都会显示"
+                android:textColor="#99FFFFFF"
+                android:textSize="11sp" />
+
+            <!-- 提示线的样式：只在开关打开时出现 -->
+            <LinearLayout
+                android:id="@+id/boxHintStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvHintInset"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="左右留白：2%"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="15sp" />
+
+                <SeekBar
+                    android:id="@+id/sbHintInset"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp" />
+
+                <TextView
+                    android:id="@+id/tvHintAlpha"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="不透明度：100%"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="15sp" />
+
+                <SeekBar
+                    android:id="@+id/sbHintAlpha"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp" />
+
+                <TextView
+                    android:id="@+id/tvHintWidth"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="粗细：3dp"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="15sp" />
+
+                <SeekBar
+                    android:id="@+id/sbHintWidth"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:text="线条颜色"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="15sp" />
+
+                <LinearLayout
+                    android:id="@+id/hintColorRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical" />
+            </LinearLayout>
+
+            <!-- ==================== 缩略图 ==================== -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="缩略图"
+                android:textColor="#FF7FE3F5"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/swGrid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:text="长按时显示棋盘格线"
+                android:textColor="#FFFFFFFF"
+                android:textSize="15sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:text="长按缩略图时，每个格子四周描这个颜色的线"
                 android:textColor="#99FFFFFF"
                 android:textSize="11sp" />
@@ -246,6 +332,7 @@
                 android:layout_marginTop="10dp"
                 android:orientation="vertical" />
 
+            <!-- ==================== 界面配色 ==================== -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

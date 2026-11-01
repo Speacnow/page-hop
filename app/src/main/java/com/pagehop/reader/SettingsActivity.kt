@@ -141,6 +141,63 @@ class SettingsActivity : AppCompatActivity() {
         b.swGrid.setOnCheckedChangeListener { _, checked -> UiPrefs.setGridLines(this, checked) }
     }
 
+    /** 翻页提示线的留白 / 不透明度 / 粗细 / 颜色 */
+    private fun setupHintStyle() {
+        b.tvHintInset.setTextColor(0xFFFFFFFF.toInt())
+        b.tvHintAlpha.setTextColor(0xFFFFFFFF.toInt())
+        b.tvHintWidth.setTextColor(0xFFFFFFFF.toInt())
+
+        b.tvHintInset.text = "左右留白：${UiPrefs.flipHintInset}%"
+        b.sbHintInset.max = 20
+        b.sbHintInset.progress = UiPrefs.flipHintInset
+        b.sbHintInset.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(sb: SeekBar?, p: Int, fromUser: Boolean) {
+                b.tvHintInset.text = "左右留白：$p%"
+                UiPrefs.setFlipHintInset(this@SettingsActivity, p)
+            }
+
+            override fun onStartTrackingTouch(sb: SeekBar?) {}
+            override fun onStopTrackingTouch(sb: SeekBar?) {}
+        })
+
+        b.tvHintAlpha.text = "不透明度：${UiPrefs.flipHintAlpha}%"
+        b.sbHintAlpha.max = 100
+        b.sbHintAlpha.progress = UiPrefs.flipHintAlpha
+        b.sbHintAlpha.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(sb: SeekBar?, p: Int, fromUser: Boolean) {
+                val v = p.coerceAtLeast(10)
+                b.tvHintAlpha.text = "不透明度：$v%"
+                UiPrefs.setFlipHintAlpha(this@SettingsActivity, v)
+            }
+
+            override fun onStartTrackingTouch(sb: SeekBar?) {}
+            override fun onStopTrackingTouch(sb: SeekBar?) {}
+        })
+
+        b.tvHintWidth.text = "粗细：${UiPrefs.flipHintWidth}dp"
+        b.sbHintWidth.max = 11
+        b.sbHintWidth.progress = UiPrefs.flipHintWidth - 1
+        b.sbHintWidth.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(sb: SeekBar?, p: Int, fromUser: Boolean) {
+                val dp = p + 1
+                b.tvHintWidth.text = "粗细：${dp}dp"
+                UiPrefs.setFlipHintWidth(this@SettingsActivity, dp)
+            }
+
+            override fun onStartTrackingTouch(sb: SeekBar?) {}
+            override fun onStopTrackingTouch(sb: SeekBar?) {}
+        })
+
+        b.hintColorRow.addView(
+            dotRow(UiPrefs.hintColors.map { it.second }, UiPrefs.flipHintColor) { picked ->
+                UiPrefs.setFlipHintColor(this, picked)
+                // 换色原地生效：重画一下这一行
+                b.hintColorRow.removeAllViews()
+                setupHintStyle()
+            },
+        )
+    }
+
     private fun setupVolumeSwitch() {
         b.swVolume.isChecked = UiPrefs.volumeKeys
         b.swVolume.thumbTintList = ColorStateList(
@@ -188,7 +245,13 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         b.swFlipHint.isChecked = UiPrefs.flipHint
-        b.swFlipHint.setOnCheckedChangeListener { _, on -> UiPrefs.setFlipHint(this, on) }
+        b.boxHintStyle.visibility = if (UiPrefs.flipHint) View.VISIBLE else View.GONE
+        b.swFlipHint.setOnCheckedChangeListener { _, on ->
+            UiPrefs.setFlipHint(this, on)
+            // 样式只在提示线开着时才有意义
+            b.boxHintStyle.visibility = if (on) View.VISIBLE else View.GONE
+        }
+        setupHintStyle()
 
         b.swCorner.isChecked = UiPrefs.cornerButton
         b.swCorner.setOnCheckedChangeListener { _, on -> UiPrefs.setCornerButton(this, on) }
