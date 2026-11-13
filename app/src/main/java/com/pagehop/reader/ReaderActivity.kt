@@ -96,6 +96,9 @@ class ReaderActivity : AppCompatActivity() {
         const val MODE_BOOKMARKS = 0
         const val MODE_TOC = 1
         const val MODE_THUMBS = 2
+
+        /** 全屏时右上角"加/删书签"热区的边长；用 dp 是为了不同机型手感和一致 */
+        private const val BOOKMARK_CORNER_DP = 78f
     }
 
     private lateinit var b: ActivityReaderBinding
@@ -205,7 +208,6 @@ class ReaderActivity : AppCompatActivity() {
                 else -> false
             }
         }
-        b.bookmarkHotspot.setOnClickListener { toggleBookmark() }
         b.btnPageJump.setOnClickListener { showJumpDialog() }
         b.btnPageBack.setOnClickListener { goBack() }
         b.btnPageBack.setOnLongClickListener { showHistoryDialog(); true }
@@ -337,7 +339,9 @@ class ReaderActivity : AppCompatActivity() {
                     textMode -> showTextNoteDialog(page, fx, fy)
                     // 批注模式：写字优先，单击只负责收起 / 调出工具栏
                     penMode -> toggleBars()
-                    // 非批注 + 开了触摸翻页：中间一半开关工具栏，两侧翻页
+                    // 全屏（没有工具栏）时点屏幕右上角：给这一页加 / 删书签
+                    !barsVisible && inBookmarkCorner(rx, ry) -> toggleBookmark(page)
+                    // 非批注 + 开了触摸翻页：四条边翻页，中间一半开关工具栏
                     UiPrefs.tapPaging -> handleZoneTap(rx, ry)
                     else -> toggleBars()
                 }
@@ -1169,8 +1173,14 @@ class ReaderActivity : AppCompatActivity() {
 
     private fun hasBookmark(page: Int): Boolean = state.bookmarks.contains(page)
 
-    private fun toggleBookmark() {
-        if (hasBookmark(currentPage)) confirmRemoveBookmark(currentPage) else addBookmark(currentPage)
+    /** 全屏时右上角那块"点一下加书签"的区域：78dp 见方，贴在屏幕真正的右上角 */
+    private fun inBookmarkCorner(x: Float, y: Float): Boolean {
+        val size = BOOKMARK_CORNER_DP * resources.displayMetrics.density
+        return x >= resources.displayMetrics.widthPixels - size && y <= size
+    }
+
+    private fun toggleBookmark(page: Int = currentPage) {
+        if (hasBookmark(page)) confirmRemoveBookmark(page) else addBookmark(page)
     }
 
     private fun addBookmark(page: Int) {
@@ -2486,20 +2496,30 @@ class ReaderActivity : AppCompatActivity() {
      * 左右模式：左 1/4 往前、右 1/4 往后。
      * 坐标是按下点的屏幕坐标（rawX / rawY），所以页面缩放也能算对。
      */
+    /**
+     * 四向翻页：屏幕四条边各占 25%，点上边或左边往上一屏，点下边或右边往下一屏。
+     * 中间剩下的一半（宽 50% × 高 50%）点一下开关工具栏。
+     *
+     * 四个角同时落在两条边上，按"离哪条边最近"来算，
+     * 所以从边往中间划过去时行为是连续的，不会在角上突然变成反方向。
+     */
     private fun handleZoneTap(x: Float, y: Float) {
-        val dm = resources.displayMetrics
-        if (UiPrefs.tapPagingHorizontal) {
-            when {
-                x < dm.widthPixels * 0.25f -> scrollByViewport(forward = false)
-                x > dm.widthPixels * 0.75f -> scrollByViewport(forward = true)
-                else -> toggleBars()
-            }
+        val w = resources.displayMetrics.widthPixels.toFloat()
+        val h = resources.displayMetrics.heightPixels.toFloat()
+        val left = x / w
+        val right = (w - x) / w
+        val top = y / h
+        val bottom = (h - y) / h
+        val nearest = minOf(left, right, top, bottom)
+        if (nearest > 0.25f) {
+            toggleBars()
+            return
+        }
+        // 左边和上边往上一屏，右边和下边往下一屏
+        if (nearest == left || nearest == top) {
+            scrollByViewport(forward = false)
         } else {
-            when {
-                y < dm.heightPixels * 0.25f -> scrollByViewport(forward = false)
-                y > dm.heightPixels * 0.75f -> scrollByViewport(forward = true)
-                else -> toggleBars()
-            }
+            scrollByViewport(forward = true)
         }
     }
 

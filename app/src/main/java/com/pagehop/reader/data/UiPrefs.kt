@@ -19,7 +19,6 @@ object UiPrefs {
     private const val K_VOLUME_OVERLAP = "volume_overlap"
     private const val K_CORNER_BTN = "corner_button"
     private const val K_TAP_PAGING = "tap_paging"
-    private const val K_TAP_HORIZ = "tap_paging_horizontal"
     private const val K_FLIP_HINT = "flip_hint"
     private const val K_HINT_INSET = "flip_hint_inset"
     private const val K_HINT_ALPHA = "flip_hint_alpha"
@@ -61,14 +60,10 @@ object UiPrefs {
         private set
 
     /**
-     * 非批注模式下点屏幕翻页：屏幕中间一半还是"开关工具栏"，
-     * 两侧/上下四分之一是翻页。
+     * 非批注模式下点屏幕翻页：四条边各 25% 翻一屏（上/左往前，下/右往后），
+     * 中间那一半是"开关工具栏"。
      */
     var tapPaging: Boolean = true
-        private set
-
-    /** 触摸翻页方向：true = 左右（左往前、右往后），false = 上下（上往前、下往后，默认） */
-    var tapPagingHorizontal: Boolean = false
         private set
 
     /** 翻完一屏画一条分界线，标出上一屏到哪儿结束（默认开） */
@@ -162,7 +157,6 @@ object UiPrefs {
         volumeOverlap = p.getInt(K_VOLUME_OVERLAP, 10).coerceIn(0, 40)
         cornerButton = p.getBoolean(K_CORNER_BTN, true)
         tapPaging = p.getBoolean(K_TAP_PAGING, true)
-        tapPagingHorizontal = p.getBoolean(K_TAP_HORIZ, false)
         flipHint = p.getBoolean(K_FLIP_HINT, true)
         flipHintInset = p.getInt(K_HINT_INSET, 3).coerceIn(0, 20)
         flipHintAlpha = p.getInt(K_HINT_ALPHA, 40).coerceIn(10, 100)
@@ -218,11 +212,6 @@ object UiPrefs {
     fun setTapPaging(ctx: Context, on: Boolean) {
         tapPaging = on
         edit(ctx).putBoolean(K_TAP_PAGING, on).apply()
-    }
-
-    fun setTapPagingHorizontal(ctx: Context, horizontal: Boolean) {
-        tapPagingHorizontal = horizontal
-        edit(ctx).putBoolean(K_TAP_HORIZ, horizontal).apply()
     }
 
     fun setFlipHint(ctx: Context, on: Boolean) {

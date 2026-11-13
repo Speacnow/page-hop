@@ -108,7 +108,6 @@ class SettingsActivity : AppCompatActivity() {
         b.swFlipHint.setTextColor(0xFFFFFFFF.toInt())
         b.swCorner.setTextColor(0xFFFFFFFF.toInt())
         b.swTapPaging.setTextColor(0xFFFFFFFF.toInt())
-        b.swTapHorizontal.setTextColor(0xFFFFFFFF.toInt())
     }
 
     private fun setupAlpha() {
@@ -239,7 +238,7 @@ class SettingsActivity : AppCompatActivity() {
             arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
             intArrayOf(0x66005E78, 0x339E9E9E),
         )
-        for (sw in arrayOf(b.swFlipHint, b.swCorner, b.swTapPaging, b.swTapHorizontal)) {
+        for (sw in arrayOf(b.swFlipHint, b.swCorner, b.swTapPaging)) {
             sw.thumbTintList = thumbs
             sw.trackTintList = tracks
         }
@@ -257,20 +256,7 @@ class SettingsActivity : AppCompatActivity() {
         b.swCorner.setOnCheckedChangeListener { _, on -> UiPrefs.setCornerButton(this, on) }
 
         b.swTapPaging.isChecked = UiPrefs.tapPaging
-        b.swTapHorizontal.isChecked = UiPrefs.tapPagingHorizontal
-        b.swTapPaging.setOnCheckedChangeListener { _, on ->
-            UiPrefs.setTapPaging(this, on)
-            // 方向只在开了触摸翻页时才有意义
-            val visible = if (on) View.VISIBLE else View.GONE
-            b.swTapHorizontal.visibility = visible
-            b.tvTapHorizontalHint.visibility = visible
-        }
-        val visible = if (UiPrefs.tapPaging) View.VISIBLE else View.GONE
-        b.swTapHorizontal.visibility = visible
-        b.tvTapHorizontalHint.visibility = visible
-        b.swTapHorizontal.setOnCheckedChangeListener { _, horizontal ->
-            UiPrefs.setTapPagingHorizontal(this, horizontal)
-        }
+        b.swTapPaging.setOnCheckedChangeListener { _, on -> UiPrefs.setTapPaging(this, on) }
     }
 
     /**

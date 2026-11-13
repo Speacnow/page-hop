@@ -159,32 +159,9 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="点屏幕中间一半：照旧开关工具栏；点剩下的两侧：翻一屏。批注模式下不生效（那时写字优先）"
+                android:text="四条边各 25%：上边、左边往上一屏；下边、右边往下一屏。中间那一半：开关工具栏。批注模式下不生效（那时写字优先）"
                 android:textColor="#99FFFFFF"
                 android:textSize="11sp" />
-
-            <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/swTapHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="14dp"
-                android:layout_marginTop="6dp"
-                android:paddingTop="6dp"
-                android:paddingBottom="6dp"
-                android:text="左右翻页（关 = 上下翻页）"
-                android:textColor="#FFFFFFFF"
-                android:textSize="15sp"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/tvTapHorizontalHint"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="14dp"
-                android:text="开：点左边往前、点右边往后；关：点上边往前、点下边往后"
-                android:textColor="#99FFFFFF"
-                android:textSize="11sp"
-                android:visibility="gone" />
 
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/swCorner"

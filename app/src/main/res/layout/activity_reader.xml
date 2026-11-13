@@ -28,16 +28,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start" />
 
-    <!-- 右上角：点一下给当前页加/删书签（不挡正文阅读，只在角落） -->
-    <View
-        android:id="@+id/bookmarkHotspot"
-        android:layout_width="78dp"
-        android:layout_height="78dp"
-        android:layout_gravity="top|end"
-        android:layout_marginTop="48dp"
-        android:clickable="true"
-        android:focusable="true" />
-
+    <!-- 书签提示动画：全屏时点右上角，这里飞一下图标给反馈 -->
     <ImageView
         android:id="@+id/bookmarkFx"
         android:layout_width="34dp"
