@@ -11,8 +11,8 @@ android {
         applicationId = "com.pagehop.reader"
         minSdk = 26
         targetSdk = 34
-        versionCode = 88
-        versionName = "0.11.5"
+        versionCode = 89
+        versionName = "0.11.6"
 
         ndk {
             // arm64-v8a：真机（iQOO Z10 Turbo）

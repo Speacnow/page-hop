@@ -87,6 +87,7 @@ class PageAdapter(
 
         pv.highlights = state.highlights.filter { it.page == position }
         pv.strokes = state.strokes.filter { it.page == position }
+        pv.bookmarked = state.bookmarks.contains(position)
         if (!samePage) {
             clearedBinds++
             pv.bitmap = null

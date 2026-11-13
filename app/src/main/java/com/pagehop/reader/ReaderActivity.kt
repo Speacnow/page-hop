@@ -1190,7 +1190,17 @@ class ReaderActivity : AppCompatActivity() {
             persistNow()
         }
         playBookmarkFx(added = true)
+        refreshBookmarkMarks()
         if (tocView != null && tocMode == MODE_BOOKMARKS) renderTocRows()
+    }
+
+    /** 书签变了，让屏幕上已经画好的那几页重画右上角那条书签带 */
+    private fun refreshBookmarkMarks() {
+        for (i in 0 until b.pageList.childCount) {
+            val pv = b.pageList.getChildAt(i) as? PageView ?: continue
+            if (pv.pageIndex < 0) continue
+            pv.bookmarked = state.bookmarks.contains(pv.pageIndex)
+        }
     }
 
     private fun confirmRemoveBookmark(page: Int) {
@@ -1201,6 +1211,7 @@ class ReaderActivity : AppCompatActivity() {
                 state.bookmarks.remove(page)
                 persistNow()
                 playBookmarkFx(added = false)
+                refreshBookmarkMarks()
                 if (tocView != null) renderTocRows()
             }
             .setNegativeButton(R.string.cancel, null)

@@ -68,6 +68,19 @@ class PageView @JvmOverloads constructor(
 
     var strokes: List<InkStroke> = emptyList()
 
+    /**
+     * 这一页有书签：右上角画一条书签带。
+     * 画在页面上而不是浮层上，所以它跟着页面一起滚动——
+     * 上下翻的时候一眼就能看出哪一页被收藏了。
+     */
+    var bookmarked: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidate()
+            }
+        }
+
     /** 这一页上的文字批注 */
     var textNotes: List<TextNote> = emptyList()
 
@@ -112,6 +125,15 @@ class PageView @JvmOverloads constructor(
 
     /** 页与页之间的分隔线 */
     private val dividerPaint = Paint().apply { color = 0x44808080 }
+
+    /** 书签带：右上角那条书签色块 */
+    private val bookmarkFill = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = 0xFFFFC107.toInt()
+    }
+    private val bookmarkEdge = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        color = 0x55000000
+    }
 
     private val paint = Paint(Paint.FILTER_BITMAP_FLAG or Paint.DITHER_FLAG)
 
@@ -252,11 +274,34 @@ class PageView @JvmOverloads constructor(
 
         drawTextNotes(canvas)
 
+        if (bookmarked) drawBookmarkRibbon(canvas)
+
         if (rawPoints.size >= 2) {
             inkPaint.color = penColor
             inkPaint.strokeWidth = if (penStrokePx > 0f) penStrokePx else dp(1.9f)
             canvas.drawPath(inkPath, inkPaint)
         }
+    }
+
+    /** 书签带：贴在页面右上角，下面挖一个 V 口，像插了张书签 */
+    private fun drawBookmarkRibbon(canvas: Canvas) {
+        val w = (width * 0.062f).coerceIn(dp(16f), dp(44f))
+        val h = w * 1.55f
+        val right = width.toFloat() - dp(1f)
+        val left = right - w
+        val top = dp(1f)
+        val notch = h * 0.30f
+        val path = Path().apply {
+            moveTo(left, top)
+            lineTo(right, top)
+            lineTo(right, top + h)
+            lineTo(left + w / 2f, top + h - notch)
+            lineTo(left, top + h)
+            close()
+        }
+        canvas.drawPath(path, bookmarkFill)
+        bookmarkEdge.strokeWidth = dp(1f)
+        canvas.drawPath(path, bookmarkEdge)
     }
 
     private fun drawStroke(canvas: Canvas, stroke: InkStroke) {
