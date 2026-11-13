@@ -28,16 +28,18 @@
         android:layout_height="match_parent"
         android:layout_gravity="start" />
 
-    <!-- 书签提示动画：全屏时点右上角，这里飞一下图标给反馈 -->
+    <!-- 书签提示动画：全屏时点右上角，这里飞一下图标给反馈。
+         贴屏幕真正的右上角（和 78dp 热区重叠），否则看着像"页面的角"而不是"屏幕的角" -->
     <ImageView
         android:id="@+id/bookmarkFx"
         android:layout_width="34dp"
         android:layout_height="34dp"
         android:layout_gravity="top|end"
-        android:layout_marginTop="70dp"
-        android:layout_marginEnd="22dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="14dp"
         android:alpha="0"
         android:contentDescription="@string/bookmark"
+        android:elevation="12dp"
         android:src="@drawable/ic_bookmark" />
 
     <!-- 顶栏：一行图标，放不下时可以左右滑动（手写/文字批注分开两个按钮） -->
