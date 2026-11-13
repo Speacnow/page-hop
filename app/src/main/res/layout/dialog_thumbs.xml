@@ -13,7 +13,7 @@
         android:clipToPadding="false"
         android:overScrollMode="never" />
 
-    <!-- 左上角悬浮关闭按钮 -->
+    <!-- 左上角悬浮关闭按钮：白色叉 + 半透明黑圆（跟右下角翻页按钮同款） -->
     <ImageButton
         android:id="@+id/btnClose"
         android:layout_width="42dp"
@@ -24,7 +24,9 @@
         android:background="@drawable/bg_floating_button"
         android:contentDescription="@string/cancel"
         android:elevation="8dp"
-        android:src="@drawable/ic_close" />
+        android:padding="9dp"
+        android:src="@drawable/ic_close"
+        android:tint="#FFFFFFFF" />
 
     <!-- 长按预览：网格之上盖一层半透明大图 -->
     <FrameLayout

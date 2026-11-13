@@ -2021,7 +2021,9 @@ class ReaderActivity : AppCompatActivity() {
         val barFaint = (barFg and 0x00FFFFFF) or 0xAA000000.toInt()
         val bottomBar = v.findViewById<View>(R.id.thumbBottom)
         bottomBar.setBackgroundColor(UiPrefs.barColor)
-        (btnClose as? android.widget.ImageButton)?.setColorFilter(barFg)
+        // 关闭按钮是"半透明黑圆 + 白叉"，白叉不跟配色走：
+        // 原来按 barFg 上色，浅色配色下就成了深色叉，压在深色圆里几乎看不见
+        (btnClose as? android.widget.ImageButton)?.setColorFilter(0xFFFFFFFF.toInt())
         v.findViewById<TextView>(R.id.tvMapPage).setTextColor(barFg)
         v.findViewById<TextView>(R.id.tvDensity).setTextColor(barFaint)
         val barSolid = android.content.res.ColorStateList.valueOf(barFg)
