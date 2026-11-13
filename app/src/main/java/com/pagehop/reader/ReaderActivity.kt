@@ -641,7 +641,7 @@ class ReaderActivity : AppCompatActivity() {
                 gravity = Gravity.CENTER_VERTICAL
             }
             jump.setPadding(0, 0, 0, 0)
-            // 插到旋转按钮前面：[缩略图] [进度条] [页码组] [旋转]
+            // 插到最右边的缩略图按钮前面：[旋转] [进度条] [页码组] [缩略图]
             tools.addView(jump, (tools.childCount - 1).coerceAtLeast(0), jump.layoutParams)
         } else {
             bar.orientation = LinearLayout.VERTICAL

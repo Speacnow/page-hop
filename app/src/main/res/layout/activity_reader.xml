@@ -217,27 +217,7 @@
             android:paddingEnd="2dp"
             android:paddingBottom="2dp">
 
-            <ImageButton
-                android:id="@+id/btnThumbs"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/thumbs"
-                android:src="@drawable/ic_grid" />
-
-            <SeekBar
-                android:id="@+id/seekProgress"
-                android:layout_width="0dp"
-                android:layout_height="34dp"
-                android:layout_weight="1"
-                android:maxHeight="3dp"
-                android:minHeight="3dp"
-                android:paddingStart="4dp"
-                android:paddingEnd="4dp"
-                android:progressDrawable="@drawable/seek_progress"
-                android:splitTrack="false"
-                android:thumb="@drawable/seek_thumb" />
-
+            <!-- 旋转按钮挪到最左边，缩略图挪到最右边（0.11.9 互换） -->
             <FrameLayout
                 android:id="@+id/btnRotate"
                 android:layout_width="44dp"
@@ -254,6 +234,28 @@
                     android:contentDescription="@string/auto_rotate"
                     android:src="@drawable/ic_rotate" />
             </FrameLayout>
+
+            <SeekBar
+                android:id="@+id/seekProgress"
+                android:layout_width="0dp"
+                android:layout_height="34dp"
+                android:layout_weight="1"
+                android:maxHeight="3dp"
+                android:minHeight="3dp"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:progressDrawable="@drawable/seek_progress"
+                android:splitTrack="false"
+                android:thumb="@drawable/seek_thumb" />
+
+            <!-- 缩略图入口放最右边：单手拇指够得到 -->
+            <ImageButton
+                android:id="@+id/btnThumbs"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/thumbs"
+                android:src="@drawable/ic_grid" />
         </LinearLayout>
     </LinearLayout>
 
