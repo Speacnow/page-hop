@@ -126,13 +126,13 @@ class PageView @JvmOverloads constructor(
     /** 页与页之间的分隔线 */
     private val dividerPaint = Paint().apply { color = 0x44808080 }
 
-    /** 书签带：右上角那条书签色块 */
+    /** 书签带：右上角那条书签色块（半透明，压在字上也看得清） */
     private val bookmarkFill = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = 0xFFFFC107.toInt()
+        color = 0x80FFC107.toInt()   // 金色，50% 不透明
     }
     private val bookmarkEdge = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
-        color = 0x55000000
+        color = 0x40000000           // 25% 黑，只是描个形
     }
 
     private val paint = Paint(Paint.FILTER_BITMAP_FLAG or Paint.DITHER_FLAG)
@@ -285,8 +285,8 @@ class PageView @JvmOverloads constructor(
 
     /** 书签带：贴在页面右上角，下面挖一个 V 口，像插了张书签 */
     private fun drawBookmarkRibbon(canvas: Canvas) {
-        val w = (width * 0.062f).coerceIn(dp(16f), dp(44f))
-        val h = w * 1.55f
+        val w = (width * 0.045f).coerceIn(dp(12f), dp(32f))
+        val h = w * 1.5f
         val right = width.toFloat() - dp(1f)
         val left = right - w
         val top = dp(1f)
